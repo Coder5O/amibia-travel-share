@@ -1,16 +1,30 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useAuth } from "@/contexts/AuthContext";
+import DestinationSlideshow from "@/components/DestinationSlideshow";
+import PostFeed from "@/components/PostFeed";
+import logo from "@/assets/logo.png";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+export default function Index() {
+  const { user } = useAuth();
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="max-w-lg mx-auto pb-24">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <img src={logo} alt="Ride With Me" className="w-8 h-8" width={512} height={512} />
+        <h1 className="text-xl font-bold text-gradient-sunset">Ride With Me</h1>
+      </div>
+
+      {/* Destinations */}
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold text-foreground mb-3">Discover Namibia 🇳🇦</h2>
+        <DestinationSlideshow />
+      </section>
+
+      {/* Feed */}
+      <section>
+        <h2 className="text-lg font-semibold text-foreground mb-3">Travel Feed</h2>
+        <PostFeed />
+      </section>
     </div>
   );
-};
-
-const Index = PlaceholderIndex;
-
-export default Index;
+}

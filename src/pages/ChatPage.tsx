@@ -76,8 +76,8 @@ export default function ChatPage() {
       ? await supabase.from("profiles").select("user_id, display_name, avatar_url, category").in("user_id", otherUserIds)
       : { data: [] };
 
-    const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
-    const participantMap = new Map(otherParticipants?.map((p) => [p.conversation_id, p.user_id]) || []);
+    const profileMap = new Map((profiles || []).map((p) => [p.user_id, p] as const));
+    const participantMap = new Map((otherParticipants || []).map((p) => [p.conversation_id, p.user_id] as const));
 
     setConversations(
       convoIds.map((id) => ({

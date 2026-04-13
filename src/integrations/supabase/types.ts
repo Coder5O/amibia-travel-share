@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -55,6 +87,33 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+        }
+        Relationships: []
+      }
+      emergency_contacts: {
+        Row: {
+          contact_name: string
+          created_at: string
+          id: string
+          phone: string
+          relationship: string | null
+          user_id: string
+        }
+        Insert: {
+          contact_name: string
+          created_at?: string
+          id?: string
+          phone: string
+          relationship?: string | null
+          user_id: string
+        }
+        Update: {
+          contact_name?: string
+          created_at?: string
+          id?: string
+          phone?: string
+          relationship?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -194,12 +253,14 @@ export type Database = {
           created_at: string
           display_name: string
           fun_fact: string | null
+          gender: string | null
           id: string
           languages: string[] | null
           location: string | null
           travel_style: string | null
           updated_at: string
           user_id: string
+          verified: boolean
         }
         Insert: {
           age?: number | null
@@ -209,12 +270,14 @@ export type Database = {
           created_at?: string
           display_name: string
           fun_fact?: string | null
+          gender?: string | null
           id?: string
           languages?: string[] | null
           location?: string | null
           travel_style?: string | null
           updated_at?: string
           user_id: string
+          verified?: boolean
         }
         Update: {
           age?: number | null
@@ -224,10 +287,127 @@ export type Database = {
           created_at?: string
           display_name?: string
           fun_fact?: string | null
+          gender?: string | null
           id?: string
           languages?: string[] | null
           location?: string | null
           travel_style?: string | null
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      ratings: {
+        Row: {
+          created_at: string
+          id: string
+          review_text: string | null
+          reviewed_user_id: string
+          reviewer_id: string
+          score: number
+          trip_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          review_text?: string | null
+          reviewed_user_id: string
+          reviewer_id: string
+          score: number
+          trip_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          review_text?: string | null
+          reviewed_user_id?: string
+          reviewer_id?: string
+          score?: number
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_places: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_places_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          available_seats: number
+          budget: number | null
+          cost_split_method: string | null
+          created_at: string
+          departure_date: string
+          description: string | null
+          destination: string
+          id: string
+          region: string | null
+          return_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_seats?: number
+          budget?: number | null
+          cost_split_method?: string | null
+          created_at?: string
+          departure_date: string
+          description?: string | null
+          destination: string
+          id?: string
+          region?: string | null
+          return_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_seats?: number
+          budget?: number | null
+          cost_split_method?: string | null
+          created_at?: string
+          departure_date?: string
+          description?: string | null
+          destination?: string
+          id?: string
+          region?: string | null
+          return_date?: string | null
+          status?: string
           updated_at?: string
           user_id?: string
         }

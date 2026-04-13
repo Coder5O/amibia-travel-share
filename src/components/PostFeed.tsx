@@ -82,7 +82,7 @@ export default function PostFeed() {
     if (data) {
       const userIds = [...new Set(data.map((c) => c.user_id))];
       const { data: profiles } = userIds.length ? await supabase.from("profiles").select("user_id, display_name").in("user_id", userIds) : { data: [] };
-      const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+      const profileMap = new Map((profiles || []).map((p) => [p.user_id, p] as const));
       setCommentsMap((prev) => ({ ...prev, [postId]: data.map((c) => ({ ...c, profile: profileMap.get(c.user_id) as any })) }));
     }
   };

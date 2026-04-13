@@ -49,7 +49,7 @@ export default function TripBoardPage() {
     if (data) {
       const userIds = [...new Set(data.map((t) => t.user_id))];
       const { data: profiles } = userIds.length ? await supabase.from("profiles").select("user_id, display_name, category").in("user_id", userIds) : { data: [] };
-      const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+      const profileMap = new Map((profiles || []).map((p) => [p.user_id, p] as const));
       setTrips(data.map((t) => ({ ...t, profile: profileMap.get(t.user_id) as any })));
     }
   };

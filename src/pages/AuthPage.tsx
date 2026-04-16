@@ -12,6 +12,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const { signUp, signIn } = useAuth();
   const { toast } = useToast();
@@ -21,7 +22,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       if (isSignUp) {
-        await signUp(email, password, { display_name: displayName });
+        await signUp(email, password, { display_name: displayName, phone });
         toast({ title: "Welcome to Ride With Me! 🎉", description: "Check your email to confirm your account." });
       } else {
         await signIn(email, password);
@@ -57,19 +58,19 @@ export default function AuthPage() {
           </div>
         </div>
         <div className="lg:w-1/2 flex items-center justify-center p-6 bg-background">
-          <FormContent isSignUp={isSignUp} setIsSignUp={setIsSignUp} email={email} setEmail={setEmail} password={password} setPassword={setPassword} displayName={displayName} setDisplayName={setDisplayName} loading={loading} onSubmit={handleSubmit} />
+          <FormContent isSignUp={isSignUp} setIsSignUp={setIsSignUp} email={email} setEmail={setEmail} password={password} setPassword={setPassword} displayName={displayName} setDisplayName={setDisplayName} phone={phone} setPhone={setPhone} loading={loading} onSubmit={handleSubmit} />
         </div>
       </div>
 
       {/* Mobile form */}
       <div className="flex-1 px-6 -mt-6 relative z-10 lg:hidden">
-        <FormContent isSignUp={isSignUp} setIsSignUp={setIsSignUp} email={email} setEmail={setEmail} password={password} setPassword={setPassword} displayName={displayName} setDisplayName={setDisplayName} loading={loading} onSubmit={handleSubmit} />
+        <FormContent isSignUp={isSignUp} setIsSignUp={setIsSignUp} email={email} setEmail={setEmail} password={password} setPassword={setPassword} displayName={displayName} setDisplayName={setDisplayName} phone={phone} setPhone={setPhone} loading={loading} onSubmit={handleSubmit} />
       </div>
     </div>
   );
 }
 
-function FormContent({ isSignUp, setIsSignUp, email, setEmail, password, setPassword, displayName, setDisplayName, loading, onSubmit }: any) {
+function FormContent({ isSignUp, setIsSignUp, email, setEmail, password, setPassword, displayName, setDisplayName, phone, setPhone, loading, onSubmit }: any) {
   return (
     <div className="w-full max-w-md animate-slide-in">
       <h2 className="text-2xl font-bold text-foreground mb-1">
@@ -81,10 +82,16 @@ function FormContent({ isSignUp, setIsSignUp, email, setEmail, password, setPass
 
       <form onSubmit={onSubmit} className="space-y-4">
         {isSignUp && (
-          <div>
-            <Label htmlFor="name">Display Name</Label>
-            <Input id="name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your travel name" required />
-          </div>
+          <>
+            <div>
+              <Label htmlFor="name">Display Name</Label>
+              <Input id="name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your travel name" required />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+264 81 234 5678" required />
+            </div>
+          </>
         )}
         <div>
           <Label htmlFor="email">Email</Label>

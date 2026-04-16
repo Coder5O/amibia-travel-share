@@ -14,16 +14,19 @@ interface Location {
   region: string | null;
 }
 
-const categoryLabels: Record<string, string> = {
-  most_visited: "🔥 Most Visited",
-  top_rated: "⭐ Top Rated",
-  hidden_gems: "💎 Hidden Gems",
-  recreational: "🏄 Recreational",
-};
+const filterTabs = [
+  { key: "all", label: "🌍 All" },
+  { key: "most_visited", label: "🔥 Most Visited" },
+  { key: "top_rated", label: "⭐ Top Rated" },
+  { key: "restaurant", label: "🍽️ Restaurants" },
+  { key: "nightlife", label: "🎶 Nightlife" },
+  { key: "nature", label: "🏞️ Nature" },
+  { key: "cultural", label: "🏛️ Cultural" },
+];
 
 export default function DestinationSlideshow() {
   const [locations, setLocations] = useState<Location[]>([]);
-  const [activeCategory, setActiveCategory] = useState("most_visited");
+  const [activeFilter, setActiveFilter] = useState("all");
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -32,7 +35,13 @@ export default function DestinationSlideshow() {
     });
   }, []);
 
-  const filtered = locations.filter((l) => l.category === activeCategory);
+  const filtered = activeFilter === "all"
+    ? locations
+    : activeFilter === "most_visited"
+      ? [...locations].sort((a, b) => (b.visit_count || 0) - (a.visit_count || 0)).slice(0, 10)
+      : activeFilter === "top_rated"
+        ? [...locations].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 10)
+        : locations.filter((l) => l.category === activeFilter);
   const current = filtered[currentIndex];
 
   const next = () => setCurrentIndex((i) => (i + 1) % filtered.length);
@@ -40,7 +49,7 @@ export default function DestinationSlideshow() {
 
   useEffect(() => {
     setCurrentIndex(0);
-  }, [activeCategory]);
+  }, [activeFilter]);
 
   useEffect(() => {
     if (filtered.length <= 1) return;
@@ -54,17 +63,17 @@ export default function DestinationSlideshow() {
     <div className="space-y-4">
       {/* Category tabs */}
       <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-        {Object.entries(categoryLabels).map(([key, label]) => (
+        {filterTabs.map((tab) => (
           <button
-            key={key}
-            onClick={() => setActiveCategory(key)}
+            key={tab.key}
+            onClick={() => setActiveFilter(tab.key)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-              activeCategory === key
+              activeFilter === tab.key
                 ? "gradient-sunset text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
-            {label}
+            {tab.label}
           </button>
         ))}
       </div>

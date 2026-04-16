@@ -255,8 +255,10 @@ export type Database = {
           fun_fact: string | null
           gender: string | null
           id: string
+          interests: string[] | null
           languages: string[] | null
           location: string | null
+          phone: string | null
           travel_style: string | null
           updated_at: string
           user_id: string
@@ -272,8 +274,10 @@ export type Database = {
           fun_fact?: string | null
           gender?: string | null
           id?: string
+          interests?: string[] | null
           languages?: string[] | null
           location?: string | null
+          phone?: string | null
           travel_style?: string | null
           updated_at?: string
           user_id: string
@@ -289,8 +293,10 @@ export type Database = {
           fun_fact?: string | null
           gender?: string | null
           id?: string
+          interests?: string[] | null
           languages?: string[] | null
           location?: string | null
+          phone?: string | null
           travel_style?: string | null
           updated_at?: string
           user_id?: string

@@ -4,10 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import AuthPage from "./pages/AuthPage";
-import OnboardingPage from "./pages/OnboardingPage";
 import Index from "./pages/Index";
 import SearchPage from "./pages/SearchPage";
 import TripBoardPage from "./pages/TripBoardPage";
@@ -20,19 +17,8 @@ const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user, loading } = useAuth();
-  const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    if (!user) { setNeedsOnboarding(null); return; }
-    supabase.from("profiles").select("category, fun_fact").eq("user_id", user.id).single()
-      .then(({ data }) => {
-        // If profile has default category and no fun_fact, show onboarding
-        const isDefault = data && !data.fun_fact && data.category === "has_both";
-        setNeedsOnboarding(!!isDefault);
-      });
-  }, [user]);
-
-  if (loading || (user && needsOnboarding === null)) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -41,10 +27,6 @@ function AppRoutes() {
   }
 
   if (!user) return <AuthPage />;
-
-  if (needsOnboarding) {
-    return <OnboardingPage onComplete={() => setNeedsOnboarding(false)} />;
-  }
 
   return (
     <div className="min-h-screen bg-background">

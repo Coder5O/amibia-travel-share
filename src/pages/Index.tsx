@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DestinationSlideshow from "@/components/DestinationSlideshow";
+import BuddySlideshow from "@/components/BuddySlideshow";
 import PostFeed from "@/components/PostFeed";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
@@ -30,12 +31,18 @@ export default function Index() {
         <DestinationSlideshow />
       </section>
 
-      {/* Horizontal buddy scroll */}
+      {/* Featured travel buddy slideshow */}
       <section className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-foreground">Travel Buddies</h2>
+          <h2 className="text-base font-semibold text-foreground">Featured Travel Buddy</h2>
           <button onClick={() => navigate("/search")} className="text-xs text-primary font-medium">See all</button>
         </div>
+        <BuddySlideshow />
+      </section>
+
+      {/* Horizontal buddy scroll */}
+      <section className="mb-6">
+        <h2 className="text-base font-semibold text-foreground mb-3">More Buddies</h2>
         <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
           {buddies.map((b) => (
             <button key={b.id} onClick={() => navigate("/chat")} className="flex-shrink-0 flex flex-col items-center gap-1 w-16">

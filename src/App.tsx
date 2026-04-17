@@ -5,18 +5,22 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import AuthPage from "./pages/AuthPage";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import SearchPage from "./pages/SearchPage";
 import TripBoardPage from "./pages/TripBoardPage";
 import ChatPage from "./pages/ChatPage";
 import ProfilePage from "./pages/ProfilePage";
+import LocationDetailPage from "./pages/LocationDetailPage";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user, loading } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
 
   if (loading) {
     return (
@@ -26,7 +30,9 @@ function AppRoutes() {
     );
   }
 
-  if (!user) return <AuthPage />;
+  if (!user) {
+    return showAuth ? <AuthPage /> : <LandingPage onGetStarted={() => setShowAuth(true)} />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,6 +43,7 @@ function AppRoutes() {
           <Route path="/trips" element={<TripBoardPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/location/:id" element={<LocationDetailPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

@@ -56,7 +56,10 @@ export default function ProfilePage() {
   const [form, setForm] = useState({
     display_name: "", bio: "", fun_fact: "", location: "", travel_style: "",
     category: "has_both", languages: [] as string[], interests: [] as string[], phone: "",
+    availability_status: "available", available_from: "", available_to: "", trip_type: "",
+    desired_destinations: [] as string[],
   });
+  const [destinationInput, setDestinationInput] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [idFile, setIdFile] = useState<File | null>(null);
@@ -84,6 +87,11 @@ export default function ProfilePage() {
         category: data.category || "has_both",
         languages: data.languages || [], interests: (data as any).interests || [],
         phone: (data as any).phone || "",
+        availability_status: (data as any).availability_status || "available",
+        available_from: (data as any).available_from || "",
+        available_to: (data as any).available_to || "",
+        trip_type: (data as any).trip_type || "",
+        desired_destinations: (data as any).desired_destinations || [],
       });
     }
   };
@@ -123,7 +131,12 @@ export default function ProfilePage() {
       interests: form.interests,
       phone: form.phone,
       avatar_url: avatarUrl,
-    }).eq("user_id", user.id);
+      availability_status: form.availability_status,
+      available_from: form.available_from || null,
+      available_to: form.available_to || null,
+      trip_type: form.trip_type,
+      desired_destinations: form.desired_destinations,
+    } as any).eq("user_id", user.id);
 
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
     else { toast({ title: "Profile updated! ✨" }); setEditing(false); setAvatarFile(null); setIdFile(null); loadProfile(); }

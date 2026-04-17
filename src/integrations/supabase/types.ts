@@ -247,10 +247,14 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          availability_status: string | null
+          available_from: string | null
+          available_to: string | null
           avatar_url: string | null
           bio: string | null
           category: Database["public"]["Enums"]["traveler_category"]
           created_at: string
+          desired_destinations: string[] | null
           display_name: string
           fun_fact: string | null
           gender: string | null
@@ -260,16 +264,21 @@ export type Database = {
           location: string | null
           phone: string | null
           travel_style: string | null
+          trip_type: string | null
           updated_at: string
           user_id: string
           verified: boolean
         }
         Insert: {
           age?: number | null
+          availability_status?: string | null
+          available_from?: string | null
+          available_to?: string | null
           avatar_url?: string | null
           bio?: string | null
           category: Database["public"]["Enums"]["traveler_category"]
           created_at?: string
+          desired_destinations?: string[] | null
           display_name: string
           fun_fact?: string | null
           gender?: string | null
@@ -279,16 +288,21 @@ export type Database = {
           location?: string | null
           phone?: string | null
           travel_style?: string | null
+          trip_type?: string | null
           updated_at?: string
           user_id: string
           verified?: boolean
         }
         Update: {
           age?: number | null
+          availability_status?: string | null
+          available_from?: string | null
+          available_to?: string | null
           avatar_url?: string | null
           bio?: string | null
           category?: Database["public"]["Enums"]["traveler_category"]
           created_at?: string
+          desired_destinations?: string[] | null
           display_name?: string
           fun_fact?: string | null
           gender?: string | null
@@ -298,6 +312,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           travel_style?: string | null
+          trip_type?: string | null
           updated_at?: string
           user_id?: string
           verified?: boolean

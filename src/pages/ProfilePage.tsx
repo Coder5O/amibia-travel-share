@@ -56,7 +56,10 @@ export default function ProfilePage() {
   const [form, setForm] = useState({
     display_name: "", bio: "", fun_fact: "", location: "", travel_style: "",
     category: "has_both", languages: [] as string[], interests: [] as string[], phone: "",
+    availability_status: "available", available_from: "", available_to: "", trip_type: "",
+    desired_destinations: [] as string[],
   });
+  const [destinationInput, setDestinationInput] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [idFile, setIdFile] = useState<File | null>(null);
@@ -84,6 +87,11 @@ export default function ProfilePage() {
         category: data.category || "has_both",
         languages: data.languages || [], interests: (data as any).interests || [],
         phone: (data as any).phone || "",
+        availability_status: (data as any).availability_status || "available",
+        available_from: (data as any).available_from || "",
+        available_to: (data as any).available_to || "",
+        trip_type: (data as any).trip_type || "",
+        desired_destinations: (data as any).desired_destinations || [],
       });
     }
   };
@@ -123,7 +131,12 @@ export default function ProfilePage() {
       interests: form.interests,
       phone: form.phone,
       avatar_url: avatarUrl,
-    }).eq("user_id", user.id);
+      availability_status: form.availability_status,
+      available_from: form.available_from || null,
+      available_to: form.available_to || null,
+      trip_type: form.trip_type,
+      desired_destinations: form.desired_destinations,
+    } as any).eq("user_id", user.id);
 
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
     else { toast({ title: "Profile updated! ✨" }); setEditing(false); setAvatarFile(null); setIdFile(null); loadProfile(); }
@@ -330,6 +343,51 @@ export default function ProfilePage() {
             <div><Label>Bio</Label><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2} /></div>
             <div><Label>Travel Style</Label><Input value={form.travel_style} onChange={(e) => setForm({ ...form, travel_style: e.target.value })} placeholder="Adventurous, relaxed..." /></div>
 
+            {/* Availability */}
+            <div className="rounded-xl border border-border p-3 space-y-3">
+              <p className="text-sm font-semibold text-foreground">Availability</p>
+              <div>
+                <Label className="text-xs">Status</Label>
+                <div className="grid grid-cols-3 gap-2 mt-1">
+                  {(["available", "planning", "busy"] as const).map((s) => (
+                    <button key={s} type="button" onClick={() => setForm({ ...form, availability_status: s })}
+                      className={`py-2 rounded-lg text-xs font-medium capitalize transition-all ${form.availability_status === s ? "gradient-sunset text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><Label className="text-xs">From</Label><Input type="date" value={form.available_from} onChange={(e) => setForm({ ...form, available_from: e.target.value })} /></div>
+                <div><Label className="text-xs">To</Label><Input type="date" value={form.available_to} onChange={(e) => setForm({ ...form, available_to: e.target.value })} /></div>
+              </div>
+              <div>
+                <Label className="text-xs">Trip Type</Label>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {["Day Trip", "Weekend", "Road Trip", "Long Haul"].map((t) => (
+                    <button key={t} type="button" onClick={() => setForm({ ...form, trip_type: t })}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${form.trip_type === t ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Dream Destinations</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input value={destinationInput} onChange={(e) => setDestinationInput(e.target.value)} placeholder="e.g. Etosha" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); const d = destinationInput.trim(); if (d && !form.desired_destinations.includes(d)) setForm({ ...form, desired_destinations: [...form.desired_destinations, d] }); setDestinationInput(""); } }} />
+                  <Button type="button" size="sm" variant="outline" onClick={() => { const d = destinationInput.trim(); if (d && !form.desired_destinations.includes(d)) setForm({ ...form, desired_destinations: [...form.desired_destinations, d] }); setDestinationInput(""); }}>Add</Button>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {form.desired_destinations.map((d) => (
+                    <Badge key={d} variant="secondary" className="flex items-center gap-1 text-xs">
+                      {d} <button type="button" onClick={() => setForm({ ...form, desired_destinations: form.desired_destinations.filter((x) => x !== d) })}><X className="w-3 h-3" /></button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* ID Upload */}
             <div>
               <Label>ID Verification (optional)</Label>
@@ -356,6 +414,24 @@ export default function ProfilePage() {
             )}
             {(profile as any).interests && (profile as any).interests.length > 0 && (
               <div className="flex flex-wrap gap-1">{(profile as any).interests.map((i: string) => <Badge key={i} variant="secondary" className="text-xs">{i}</Badge>)}</div>
+            )}
+
+            {/* Availability summary */}
+            {((profile as any).availability_status || (profile as any).trip_type || ((profile as any).desired_destinations?.length)) && (
+              <div className="rounded-xl bg-muted/50 p-3 space-y-1.5 mt-2">
+                <p className="text-xs font-semibold text-foreground">Availability</p>
+                <p className="text-xs text-muted-foreground flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${(profile as any).availability_status === "busy" ? "bg-muted-foreground" : (profile as any).availability_status === "planning" ? "bg-amber-500" : "bg-green-500"}`} />
+                  <span className="capitalize text-foreground font-medium">{(profile as any).availability_status || "available"}</span>
+                  {(profile as any).available_from && <span>· {new Date((profile as any).available_from).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} – {(profile as any).available_to ? new Date((profile as any).available_to).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "open"}</span>}
+                </p>
+                {(profile as any).trip_type && <p className="text-xs text-muted-foreground"><span className="font-medium text-foreground">Trip type:</span> {(profile as any).trip_type}</p>}
+                {(profile as any).desired_destinations?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {(profile as any).desired_destinations.map((d: string) => <Badge key={d} variant="outline" className="text-[10px]">{d}</Badge>)}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}

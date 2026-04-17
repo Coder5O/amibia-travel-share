@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { MapPin, Star, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Location {
@@ -25,6 +25,7 @@ const filterTabs = [
 ];
 
 export default function DestinationSlideshow() {
+  const navigate = useNavigate();
   const [locations, setLocations] = useState<Location[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -80,15 +81,21 @@ export default function DestinationSlideshow() {
 
       {/* Slideshow */}
       <div className="relative rounded-2xl overflow-hidden group aspect-[16/9]">
-        <img
-          src={current.image_url || ""}
-          alt={current.name}
-          className="w-full h-full object-cover transition-all duration-700"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
-        
-        <div className="absolute bottom-0 left-0 right-0 p-6">
+        <button
+          onClick={() => navigate(`/location/${current.id}`)}
+          className="absolute inset-0 w-full h-full"
+          aria-label={`View ${current.name}`}
+        >
+          <img
+            src={current.image_url || ""}
+            alt={current.name}
+            className="w-full h-full object-cover transition-all duration-700"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
+        </button>
+
+        <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
           <h3 className="text-2xl font-bold text-primary-foreground mb-1">{current.name}</h3>
           <p className="text-primary-foreground/80 text-sm mb-3 line-clamp-2">{current.description}</p>
           <div className="flex items-center gap-4 text-primary-foreground/70 text-xs">

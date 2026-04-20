@@ -198,11 +198,47 @@ export default function TripBoardPage() {
 
             {trip.description && <p className="text-sm text-foreground mb-3">{trip.description}</p>}
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => setShowCalc(showCalc === trip.id ? null : trip.id)} className="text-xs">
                 <Calculator className="w-3 h-3 mr-1" /> Split Cost
               </Button>
+
+              {user && trip.user_id !== user.id && (
+                myRequests[trip.id] === "pending" ? (
+                  <Button size="sm" variant="outline" onClick={() => cancelRequest(trip.id)} className="text-xs">
+                    <Clock className="w-3 h-3 mr-1" /> Pending — cancel
+                  </Button>
+                ) : myRequests[trip.id] === "accepted" ? (
+                  <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-600 font-medium flex items-center gap-1">
+                    <Check className="w-3 h-3" /> You're in!
+                  </span>
+                ) : myRequests[trip.id] === "declined" ? (
+                  <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">Declined</span>
+                ) : (
+                  <Button size="sm" onClick={() => requestToJoin(trip.id)} className="gradient-sunset text-primary-foreground text-xs">
+                    <Users className="w-3 h-3 mr-1" /> Request to Join
+                  </Button>
+                )
+              )}
             </div>
+
+            {/* Owner: incoming join requests */}
+            {user && trip.user_id === user.id && participants[trip.id]?.length > 0 && (
+              <div className="mt-3 p-3 rounded-xl bg-muted/50 space-y-2">
+                <p className="text-xs font-semibold text-foreground">Join requests ({participants[trip.id].length})</p>
+                {participants[trip.id].map((p) => (
+                  <div key={p.id} className="flex items-center justify-between text-xs">
+                    <span className="text-foreground">{p.user_id.slice(0, 8)}… <span className="text-muted-foreground">· {p.status}</span></span>
+                    {p.status === "pending" && (
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => respondToRequest(p.id, "accepted")}><Check className="w-3 h-3" /></Button>
+                        <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => respondToRequest(p.id, "declined")}><X className="w-3 h-3" /></Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {showCalc === trip.id && trip.budget && (
               <div className="mt-3 p-3 rounded-xl bg-muted animate-fade-in">

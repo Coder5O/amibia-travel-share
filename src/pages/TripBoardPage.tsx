@@ -209,7 +209,7 @@ export default function TripBoardPage() {
                     <Clock className="w-3 h-3 mr-1" /> Pending — cancel
                   </Button>
                 ) : myRequests[trip.id] === "accepted" ? (
-                  <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-600 font-medium flex items-center gap-1">
+                  <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
                     <Check className="w-3 h-3" /> You're in!
                   </span>
                 ) : myRequests[trip.id] === "declined" ? (

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Calendar, Users, DollarSign, Plus, X, Calculator } from "lucide-react";
+import { MapPin, Calendar, Users, DollarSign, Plus, X, Calculator, Check, Clock } from "lucide-react";
 
 interface Trip {
   id: string;
@@ -42,7 +42,11 @@ export default function TripBoardPage() {
     region: "",
   });
 
+  const [participants, setParticipants] = useState<Record<string, any[]>>({});
+  const [myRequests, setMyRequests] = useState<Record<string, string>>({}); // trip_id -> status
+
   useEffect(() => { loadTrips(); }, []);
+  useEffect(() => { if (user) loadParticipantData(); }, [user, trips.length]);
 
   const loadTrips = async () => {
     const { data } = await supabase.from("trips").select("*").eq("status", "open").order("departure_date", { ascending: true });
@@ -52,6 +56,41 @@ export default function TripBoardPage() {
       const profileMap = new Map((profiles || []).map((p) => [p.user_id, p] as const));
       setTrips(data.map((t) => ({ ...t, profile: profileMap.get(t.user_id) as any })));
     }
+  };
+
+  const loadParticipantData = async () => {
+    if (!user || !trips.length) return;
+    const tripIds = trips.map((t) => t.id);
+    const { data } = await supabase.from("trip_participants").select("*").in("trip_id", tripIds);
+    if (!data) return;
+    const grouped: Record<string, any[]> = {};
+    const mine: Record<string, string> = {};
+    for (const p of data) {
+      grouped[p.trip_id] = grouped[p.trip_id] || [];
+      grouped[p.trip_id].push(p);
+      if (p.user_id === user.id) mine[p.trip_id] = p.status;
+    }
+    setParticipants(grouped);
+    setMyRequests(mine);
+  };
+
+  const requestToJoin = async (tripId: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("trip_participants").insert({ trip_id: tripId, user_id: user.id });
+    if (error) toast({ title: "Couldn't request", description: error.message, variant: "destructive" });
+    else { toast({ title: "Request sent! 🙋" }); loadParticipantData(); }
+  };
+
+  const cancelRequest = async (tripId: string) => {
+    if (!user) return;
+    await supabase.from("trip_participants").delete().eq("trip_id", tripId).eq("user_id", user.id);
+    loadParticipantData();
+  };
+
+  const respondToRequest = async (participantId: string, status: "accepted" | "declined") => {
+    await supabase.from("trip_participants").update({ status }).eq("id", participantId);
+    toast({ title: status === "accepted" ? "Buddy accepted! 🎉" : "Request declined" });
+    loadParticipantData();
   };
 
   const createTrip = async () => {

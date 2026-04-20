@@ -161,20 +161,7 @@ export default function ProfilePage() {
     setAvatarPreview(URL.createObjectURL(file));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("posts").upload(path, file);
-    if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
-    const { data: urlData } = supabase.storage.from("posts").getPublicUrl(path);
-    const caption = prompt("Add a caption:") || "";
-    const locationName = prompt("Location?") || "";
-    await supabase.from("posts").insert({ user_id: user.id, image_url: urlData.publicUrl, caption, location_name: locationName });
-    toast({ title: "Post shared! 🌍" });
-    loadPosts();
-  };
+  // Post creation handled by CreatePostDialog
 
   const addEmergencyContact = async () => {
     if (!user || !newContact.contact_name || !newContact.phone) return;
@@ -466,7 +453,9 @@ export default function ProfilePage() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-foreground text-sm">My Adventures</h3>
-              <label className="cursor-pointer"><input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} /><div className="flex items-center gap-1 text-sm text-primary font-medium"><Camera className="w-4 h-4" /> Post</div></label>
+              <button onClick={() => setShowCreatePost(true)} className="flex items-center gap-1 text-sm text-primary font-medium">
+                <Camera className="w-4 h-4" /> New Post
+              </button>
             </div>
             {posts.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">No posts yet</p> : (
               <div className="grid grid-cols-3 gap-1 rounded-xl overflow-hidden">

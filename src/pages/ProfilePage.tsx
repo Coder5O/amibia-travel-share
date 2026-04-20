@@ -478,12 +478,28 @@ export default function ProfilePage() {
 
         {activeTab === "saved" && (
           <div className="space-y-3">
-            {savedPlaces.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">No saved places</p> : savedPlaces.map((sp: any) => (
-              <div key={sp.id} className="bg-muted rounded-xl p-3">
-                <p className="font-semibold text-sm text-foreground">{sp.locations?.name || "Place"}</p>
-                <p className="text-xs text-muted-foreground">{sp.locations?.region}</p>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-foreground text-sm">Saved Places</h3>
+              <button onClick={() => navigate("/saved")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+                View all <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+            {savedPlaces.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">No saved places yet. Browse destinations and tap the bookmark icon.</p> : (
+              <div className="grid grid-cols-3 gap-2">
+                {savedPlaces.slice(0, 6).map((sp: any) => sp.locations && (
+                  <button key={sp.id} onClick={() => navigate(`/location/${sp.locations.id}`)} className="group relative aspect-square rounded-xl overflow-hidden bg-muted">
+                    {sp.locations.image_url ? (
+                      <img src={sp.locations.image_url} alt={sp.locations.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full gradient-sunset" />
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-1.5">
+                      <p className="text-[10px] font-medium text-foreground truncate">{sp.locations.name}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
 

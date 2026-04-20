@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, MapPin, Edit2, Save, Phone, AlertTriangle, Star, Bookmark, Map, ShieldCheck, X, Car, Users, Crown } from "lucide-react";
+import { Camera, MapPin, Edit2, Save, Phone, AlertTriangle, Star, Bookmark, Map, ShieldCheck, X, Car, Users, Crown, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import CreatePostDialog from "@/components/CreatePostDialog";
 
 const categoryBadge: Record<string, { label: string; emoji: string }> = {
   has_means: { label: "Has the Means", emoji: "🚗" },
@@ -50,6 +52,8 @@ function getProfileCompletion(profile: any): { percent: number; missing: string[
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [showCreatePost, setShowCreatePost] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("posts");

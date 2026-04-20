@@ -14,6 +14,7 @@ import ProfilePage from "./pages/ProfilePage";
 import LocationDetailPage from "./pages/LocationDetailPage";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
+import SOSButton from "./components/SOSButton";
 import { useState } from "react";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ function AppRoutes() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      <SOSButton />
       <BottomNav />
     </div>
   );

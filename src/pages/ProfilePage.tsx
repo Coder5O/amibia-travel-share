@@ -114,10 +114,17 @@ export default function ProfilePage() {
       avatarUrl = data.publicUrl;
     }
 
+    let verifiedFlag = profile?.verified || false;
     if (idFile) {
       const ext = idFile.name.split(".").pop();
       const path = `${user.id}/id.${ext}`;
-      await supabase.storage.from("avatars").upload(path, idFile, { upsert: true });
+      const { error: idErr } = await supabase.storage.from("id_documents").upload(path, idFile, { upsert: true });
+      if (idErr) {
+        toast({ title: "ID upload failed", description: idErr.message, variant: "destructive" });
+      } else {
+        verifiedFlag = true;
+        toast({ title: "ID submitted ✓", description: "Your account is now verified." });
+      }
     }
 
     const { error } = await supabase.from("profiles").update({
@@ -131,6 +138,7 @@ export default function ProfilePage() {
       interests: form.interests,
       phone: form.phone,
       avatar_url: avatarUrl,
+      verified: verifiedFlag,
       availability_status: form.availability_status,
       available_from: form.available_from || null,
       available_to: form.available_to || null,
@@ -218,7 +226,10 @@ export default function ProfilePage() {
       <div className="gradient-sunset rounded-b-3xl p-6 pb-16 -mx-4 -mt-4 relative">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-bold text-primary-foreground">{profile.display_name}</h2>
+            <h2 className="text-2xl font-bold text-primary-foreground flex items-center gap-1">
+              {profile.display_name}
+              {profile.verified && <ShieldCheck className="w-5 h-5 text-primary-foreground" aria-label="Verified" />}
+            </h2>
             <span className="inline-block mt-1 px-3 py-1 rounded-full bg-primary-foreground/20 text-primary-foreground text-xs font-medium">
               {badge.emoji} {badge.label}
             </span>
@@ -390,14 +401,15 @@ export default function ProfilePage() {
 
             {/* ID Upload */}
             <div>
-              <Label>ID Verification (optional)</Label>
+              <Label>ID Verification {profile.verified && <span className="text-primary text-xs">✓ Verified</span>}</Label>
               <label className="cursor-pointer block mt-1">
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setIdFile(f); }} />
+                <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setIdFile(f); }} />
                 <div className="flex items-center gap-2 p-3 rounded-xl border-2 border-dashed border-muted-foreground/30 text-sm text-muted-foreground hover:border-primary/40 transition-all">
                   <ShieldCheck className="w-5 h-5" />
-                  {idFile ? idFile.name : "Tap to upload ID photo"}
+                  {idFile ? idFile.name : profile.verified ? "Re-upload ID" : "Tap to upload ID photo (private)"}
                 </div>
               </label>
+              <p className="text-[11px] text-muted-foreground mt-1">Required for trip-join requests. Stored privately — only you can view it.</p>
             </div>
 
             <Button onClick={saveProfile} className="w-full gradient-sunset text-primary-foreground"><Save className="w-4 h-4 mr-2" /> Save Profile</Button>

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Calendar, Users, DollarSign, Plus, X, Calculator } from "lucide-react";
+import { MapPin, Calendar, Users, DollarSign, Plus, X, Calculator, Check, Clock } from "lucide-react";
 
 interface Trip {
   id: string;
@@ -42,7 +42,11 @@ export default function TripBoardPage() {
     region: "",
   });
 
+  const [participants, setParticipants] = useState<Record<string, any[]>>({});
+  const [myRequests, setMyRequests] = useState<Record<string, string>>({}); // trip_id -> status
+
   useEffect(() => { loadTrips(); }, []);
+  useEffect(() => { if (user) loadParticipantData(); }, [user, trips.length]);
 
   const loadTrips = async () => {
     const { data } = await supabase.from("trips").select("*").eq("status", "open").order("departure_date", { ascending: true });
@@ -52,6 +56,41 @@ export default function TripBoardPage() {
       const profileMap = new Map((profiles || []).map((p) => [p.user_id, p] as const));
       setTrips(data.map((t) => ({ ...t, profile: profileMap.get(t.user_id) as any })));
     }
+  };
+
+  const loadParticipantData = async () => {
+    if (!user || !trips.length) return;
+    const tripIds = trips.map((t) => t.id);
+    const { data } = await supabase.from("trip_participants").select("*").in("trip_id", tripIds);
+    if (!data) return;
+    const grouped: Record<string, any[]> = {};
+    const mine: Record<string, string> = {};
+    for (const p of data) {
+      grouped[p.trip_id] = grouped[p.trip_id] || [];
+      grouped[p.trip_id].push(p);
+      if (p.user_id === user.id) mine[p.trip_id] = p.status;
+    }
+    setParticipants(grouped);
+    setMyRequests(mine);
+  };
+
+  const requestToJoin = async (tripId: string) => {
+    if (!user) return;
+    const { error } = await supabase.from("trip_participants").insert({ trip_id: tripId, user_id: user.id });
+    if (error) toast({ title: "Couldn't request", description: error.message, variant: "destructive" });
+    else { toast({ title: "Request sent! 🙋" }); loadParticipantData(); }
+  };
+
+  const cancelRequest = async (tripId: string) => {
+    if (!user) return;
+    await supabase.from("trip_participants").delete().eq("trip_id", tripId).eq("user_id", user.id);
+    loadParticipantData();
+  };
+
+  const respondToRequest = async (participantId: string, status: "accepted" | "declined") => {
+    await supabase.from("trip_participants").update({ status }).eq("id", participantId);
+    toast({ title: status === "accepted" ? "Buddy accepted! 🎉" : "Request declined" });
+    loadParticipantData();
   };
 
   const createTrip = async () => {
@@ -159,11 +198,47 @@ export default function TripBoardPage() {
 
             {trip.description && <p className="text-sm text-foreground mb-3">{trip.description}</p>}
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => setShowCalc(showCalc === trip.id ? null : trip.id)} className="text-xs">
                 <Calculator className="w-3 h-3 mr-1" /> Split Cost
               </Button>
+
+              {user && trip.user_id !== user.id && (
+                myRequests[trip.id] === "pending" ? (
+                  <Button size="sm" variant="outline" onClick={() => cancelRequest(trip.id)} className="text-xs">
+                    <Clock className="w-3 h-3 mr-1" /> Pending — cancel
+                  </Button>
+                ) : myRequests[trip.id] === "accepted" ? (
+                  <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
+                    <Check className="w-3 h-3" /> You're in!
+                  </span>
+                ) : myRequests[trip.id] === "declined" ? (
+                  <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">Declined</span>
+                ) : (
+                  <Button size="sm" onClick={() => requestToJoin(trip.id)} className="gradient-sunset text-primary-foreground text-xs">
+                    <Users className="w-3 h-3 mr-1" /> Request to Join
+                  </Button>
+                )
+              )}
             </div>
+
+            {/* Owner: incoming join requests */}
+            {user && trip.user_id === user.id && participants[trip.id]?.length > 0 && (
+              <div className="mt-3 p-3 rounded-xl bg-muted/50 space-y-2">
+                <p className="text-xs font-semibold text-foreground">Join requests ({participants[trip.id].length})</p>
+                {participants[trip.id].map((p) => (
+                  <div key={p.id} className="flex items-center justify-between text-xs">
+                    <span className="text-foreground">{p.user_id.slice(0, 8)}… <span className="text-muted-foreground">· {p.status}</span></span>
+                    {p.status === "pending" && (
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => respondToRequest(p.id, "accepted")}><Check className="w-3 h-3" /></Button>
+                        <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => respondToRequest(p.id, "declined")}><X className="w-3 h-3" /></Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {showCalc === trip.id && trip.budget && (
               <div className="mt-3 p-3 rounded-xl bg-muted animate-fade-in">

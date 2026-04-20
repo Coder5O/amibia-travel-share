@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, MapPin, Edit2, Save, Phone, AlertTriangle, Star, Bookmark, Map, ShieldCheck, X, Car, Users, Crown } from "lucide-react";
+import { Camera, MapPin, Edit2, Save, Phone, AlertTriangle, Star, Bookmark, Map, ShieldCheck, X, Car, Users, Crown, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import CreatePostDialog from "@/components/CreatePostDialog";
 
 const categoryBadge: Record<string, { label: string; emoji: string }> = {
   has_means: { label: "Has the Means", emoji: "🚗" },
@@ -50,6 +52,8 @@ function getProfileCompletion(profile: any): { percent: number; missing: string[
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [showCreatePost, setShowCreatePost] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("posts");
@@ -157,20 +161,7 @@ export default function ProfilePage() {
     setAvatarPreview(URL.createObjectURL(file));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("posts").upload(path, file);
-    if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
-    const { data: urlData } = supabase.storage.from("posts").getPublicUrl(path);
-    const caption = prompt("Add a caption:") || "";
-    const locationName = prompt("Location?") || "";
-    await supabase.from("posts").insert({ user_id: user.id, image_url: urlData.publicUrl, caption, location_name: locationName });
-    toast({ title: "Post shared! 🌍" });
-    loadPosts();
-  };
+  // Post creation handled by CreatePostDialog
 
   const addEmergencyContact = async () => {
     if (!user || !newContact.contact_name || !newContact.phone) return;
@@ -462,7 +453,9 @@ export default function ProfilePage() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-foreground text-sm">My Adventures</h3>
-              <label className="cursor-pointer"><input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} /><div className="flex items-center gap-1 text-sm text-primary font-medium"><Camera className="w-4 h-4" /> Post</div></label>
+              <button onClick={() => setShowCreatePost(true)} className="flex items-center gap-1 text-sm text-primary font-medium">
+                <Camera className="w-4 h-4" /> New Post
+              </button>
             </div>
             {posts.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">No posts yet</p> : (
               <div className="grid grid-cols-3 gap-1 rounded-xl overflow-hidden">
@@ -485,12 +478,28 @@ export default function ProfilePage() {
 
         {activeTab === "saved" && (
           <div className="space-y-3">
-            {savedPlaces.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">No saved places</p> : savedPlaces.map((sp: any) => (
-              <div key={sp.id} className="bg-muted rounded-xl p-3">
-                <p className="font-semibold text-sm text-foreground">{sp.locations?.name || "Place"}</p>
-                <p className="text-xs text-muted-foreground">{sp.locations?.region}</p>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-foreground text-sm">Saved Places</h3>
+              <button onClick={() => navigate("/saved")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+                View all <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+            {savedPlaces.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">No saved places yet. Browse destinations and tap the bookmark icon.</p> : (
+              <div className="grid grid-cols-3 gap-2">
+                {savedPlaces.slice(0, 6).map((sp: any) => sp.locations && (
+                  <button key={sp.id} onClick={() => navigate(`/location/${sp.locations.id}`)} className="group relative aspect-square rounded-xl overflow-hidden bg-muted">
+                    {sp.locations.image_url ? (
+                      <img src={sp.locations.image_url} alt={sp.locations.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full gradient-sunset" />
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-1.5">
+                      <p className="text-[10px] font-medium text-foreground truncate">{sp.locations.name}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
 
@@ -538,6 +547,8 @@ export default function ProfilePage() {
 
         <Button variant="ghost" onClick={signOut} className="w-full text-destructive mt-4">Sign Out</Button>
       </div>
+
+      <CreatePostDialog open={showCreatePost} onOpenChange={setShowCreatePost} onCreated={loadPosts} />
     </div>
   );
 }

@@ -12,6 +12,7 @@ import TripBoardPage from "./pages/TripBoardPage";
 import ChatPage from "./pages/ChatPage";
 import ProfilePage from "./pages/ProfilePage";
 import LocationDetailPage from "./pages/LocationDetailPage";
+import SavedPlacesPage from "./pages/SavedPlacesPage";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 import SOSButton from "./components/SOSButton";
@@ -45,6 +46,7 @@ function AppRoutes() {
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/location/:id" element={<LocationDetailPage />} />
+          <Route path="/saved" element={<SavedPlacesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

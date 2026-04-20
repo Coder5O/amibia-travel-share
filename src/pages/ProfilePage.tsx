@@ -531,6 +531,8 @@ export default function ProfilePage() {
 
         <Button variant="ghost" onClick={signOut} className="w-full text-destructive mt-4">Sign Out</Button>
       </div>
+
+      <CreatePostDialog open={showCreatePost} onOpenChange={setShowCreatePost} onCreated={loadPosts} />
     </div>
   );
 }

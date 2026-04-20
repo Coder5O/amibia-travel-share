@@ -4,13 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import DestinationSlideshow from "@/components/DestinationSlideshow";
 import BuddySlideshow from "@/components/BuddySlideshow";
 import PostFeed from "@/components/PostFeed";
+import CreatePostDialog from "@/components/CreatePostDialog";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 
 export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [buddies, setBuddies] = useState<any[]>([]);
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [feedKey, setFeedKey] = useState(0);
 
   useEffect(() => {
     supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(20)
@@ -63,9 +67,25 @@ export default function Index() {
 
       {/* Feed */}
       <section>
-        <h2 className="text-base font-semibold text-foreground mb-3">Travel Feed</h2>
-        <PostFeed />
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base font-semibold text-foreground">Travel Feed</h2>
+          <button onClick={() => setShowCreatePost(true)} className="text-xs text-primary font-medium flex items-center gap-1">
+            <Plus className="w-3.5 h-3.5" /> New Post
+          </button>
+        </div>
+        <PostFeed key={feedKey} />
       </section>
+
+      {/* Floating Create Post button */}
+      <button
+        onClick={() => setShowCreatePost(true)}
+        aria-label="Create post"
+        className="fixed bottom-20 right-4 w-14 h-14 rounded-full gradient-sunset shadow-lg flex items-center justify-center z-40 hover:scale-105 transition-transform"
+      >
+        <Plus className="w-6 h-6 text-primary-foreground" />
+      </button>
+
+      <CreatePostDialog open={showCreatePost} onOpenChange={setShowCreatePost} onCreated={() => setFeedKey((k) => k + 1)} />
     </div>
   );
 }

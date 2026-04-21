@@ -241,9 +241,10 @@ export default function SearchPage() {
               {!isSelf && user && (
                 <button
                   onClick={(e) => { e.stopPropagation(); setReviewTarget({ userId: profile.user_id, name: profile.display_name }); }}
-                  className="mt-3 w-full text-[11px] text-primary border border-primary/30 rounded-full py-1 hover:bg-primary/5 transition-colors flex items-center justify-center gap-1"
+                  className="mt-3 w-full text-xs font-semibold gradient-sunset text-primary-foreground rounded-full py-1.5 shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-1"
+                  aria-label={`Leave a review for ${profile.display_name}`}
                 >
-                  <Star className="w-3 h-3" /> Leave review
+                  <Star className="w-3.5 h-3.5 fill-primary-foreground" /> Leave a review
                 </button>
               )}
             </div>

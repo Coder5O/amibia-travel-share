@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, ShieldCheck, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import LeaveReviewDialog from "@/components/LeaveReviewDialog";
 
 const ACTIVITIES = [
   { key: "lunch", label: "Casual Dining (Lunch)", emoji: "🥗" },

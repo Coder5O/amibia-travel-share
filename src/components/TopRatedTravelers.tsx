@@ -132,61 +132,88 @@ export default function TopRatedTravelers() {
           {!loading &&
             profiles.slice(0, 10).map((p, idx) => {
               const r = ratings[p.user_id];
+              const isSelf = user?.id === p.user_id;
               return (
-                <button
+                <div
                   key={p.id}
-                  onClick={() => navigate("/chat")}
-                  className="w-full flex items-center gap-3 bg-card border border-border rounded-2xl p-3 hover:border-primary/40 transition-colors text-left"
+                  className="bg-card border border-border rounded-2xl p-3 hover:border-primary/40 transition-colors"
                 >
-                  <span className="w-6 text-sm font-bold text-muted-foreground">
-                    {idx + 1}
-                  </span>
-                  <div className="relative w-12 h-12 flex-shrink-0">
-                    {p.avatar_url ? (
-                      <img
-                        src={p.avatar_url}
-                        alt={p.display_name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold">
-                        {p.display_name?.[0]?.toUpperCase() || "?"}
-                      </div>
-                    )}
-                    {p.verified && (
-                      <ShieldCheck className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary bg-background rounded-full" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">
-                      {p.display_name}
-                    </p>
-                    {p.location && (
-                      <p className="text-[11px] text-muted-foreground flex items-center gap-1 truncate">
-                        <MapPin className="w-3 h-3" />
-                        {p.location}
+                  <button
+                    onClick={() => navigate("/chat")}
+                    className="w-full flex items-center gap-3 text-left"
+                  >
+                    <span className="w-6 text-sm font-bold text-muted-foreground">
+                      {idx + 1}
+                    </span>
+                    <div className="relative w-12 h-12 flex-shrink-0">
+                      {p.avatar_url ? (
+                        <img
+                          src={p.avatar_url}
+                          alt={p.display_name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold">
+                          {p.display_name?.[0]?.toUpperCase() || "?"}
+                        </div>
+                      )}
+                      {p.verified && (
+                        <ShieldCheck className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-primary bg-background rounded-full" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {p.display_name}
                       </p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    {r ? (
-                      <>
-                        <p className="text-sm font-semibold text-foreground flex items-center gap-0.5 justify-end">
-                          <Star className="w-3.5 h-3.5 fill-accent text-accent" />
-                          {r.avg.toFixed(1)}
+                      {p.location && (
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1 truncate">
+                          <MapPin className="w-3 h-3" />
+                          {p.location}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          {r.count} review{r.count === 1 ? "" : "s"}
-                        </p>
-                      </>
-                    ) : (
-                      <p className="text-[11px] text-muted-foreground">No ratings</p>
-                    )}
-                  </div>
-                </button>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      {r ? (
+                        <>
+                          <p className="text-sm font-semibold text-foreground flex items-center gap-0.5 justify-end">
+                            <Star className="w-3.5 h-3.5 fill-accent text-accent" />
+                            {r.avg.toFixed(1)}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {r.count} review{r.count === 1 ? "" : "s"}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-[11px] text-muted-foreground">No ratings</p>
+                      )}
+                    </div>
+                  </button>
+                  {!isSelf && user && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setReviewTarget({ userId: p.user_id, name: p.display_name });
+                      }}
+                      className="mt-2 w-full text-xs font-semibold gradient-sunset text-primary-foreground rounded-full py-1.5 flex items-center justify-center gap-1 hover:opacity-90 transition-opacity"
+                      aria-label={`Leave a review for ${p.display_name}`}
+                    >
+                      <Star className="w-3.5 h-3.5 fill-primary-foreground" /> Leave a review
+                    </button>
+                  )}
+                </div>
               );
             })}
         </div>
+      )}
+
+      {reviewTarget && (
+        <LeaveReviewDialog
+          open={!!reviewTarget}
+          onOpenChange={(o) => { if (!o) setReviewTarget(null); }}
+          reviewedUserId={reviewTarget.userId}
+          reviewedDisplayName={reviewTarget.name}
+          onSubmitted={() => activity && loadTopRated(activity)}
+        />
       )}
     </div>
   );

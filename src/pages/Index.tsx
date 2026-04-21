@@ -5,6 +5,7 @@ import DestinationSlideshow from "@/components/DestinationSlideshow";
 import BuddySlideshow from "@/components/BuddySlideshow";
 import PostFeed from "@/components/PostFeed";
 import CreatePostDialog from "@/components/CreatePostDialog";
+import TopRatedTravelers from "@/components/TopRatedTravelers";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -63,6 +64,11 @@ export default function Index() {
             </button>
           ))}
         </div>
+      </section>
+
+      {/* Top rated travelers by activity */}
+      <section className="mb-6">
+        <TopRatedTravelers />
       </section>
 
       {/* Feed */}

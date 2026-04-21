@@ -30,10 +30,12 @@ type Profile = {
 
 export default function TopRatedTravelers() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activity, setActivity] = useState<string | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [ratings, setRatings] = useState<Record<string, { avg: number; count: number }>>({});
   const [loading, setLoading] = useState(false);
+  const [reviewTarget, setReviewTarget] = useState<{ userId: string; name: string } | null>(null);
 
   useEffect(() => {
     if (!activity) {

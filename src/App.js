@@ -1,13 +1,6 @@
- 
+
 import React from "react";
 
-function App() {
-  return (
-    <div>
-      <h1>Welcome to Namibia Travel Share 🌍</h1>
-      <p>Explore and share your journeys!</p>
-    </div>
-  );
+export default function App() {
+  return <h1>Change homepage title to 'My AI Travel App'</h1>;
 }
-
-export default App;

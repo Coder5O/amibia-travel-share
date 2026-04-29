@@ -9,6 +9,7 @@ import TopRatedTravelers from "@/components/TopRatedTravelers";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 
 export default function Index() {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ export default function Index() {
   const [buddies, setBuddies] = useState<any[]>([]);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [feedKey, setFeedKey] = useState(0);
+  const [emblaRef] = useEmblaCarousel({ dragFree: true });
 
   useEffect(() => {
     supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(20)
@@ -45,24 +47,26 @@ export default function Index() {
         <BuddySlideshow />
       </section>
 
-      {/* Horizontal buddy scroll */}
+      {/* Horizontal buddy scroll with Embla */}
       <section className="mb-6">
         <h2 className="text-base font-semibold text-foreground mb-3">More Buddies</h2>
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-          {buddies.map((b) => (
-            <button key={b.id} onClick={() => navigate("/chat")} className="flex-shrink-0 flex flex-col items-center gap-1 w-16">
-              <div className="w-14 h-14 rounded-full border-2 border-primary p-0.5">
-                {b.avatar_url ? (
-                  <img src={b.avatar_url} alt={b.display_name} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <div className="w-full h-full rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm">
-                    {b.display_name?.[0]?.toUpperCase() || "?"}
-                  </div>
-                )}
-              </div>
-              <span className="text-[11px] text-foreground truncate w-full text-center">{b.display_name?.split(" ")[0]}</span>
-            </button>
-          ))}
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-3 touch-pan-x pb-2 px-1">
+            {buddies.map((b) => (
+              <button key={b.id} onClick={() => navigate("/chat")} className="flex-shrink-0 flex flex-col items-center gap-1 w-16 group">
+                <div className="w-14 h-14 rounded-full border-2 border-primary p-0.5 shadow-sm group-hover:scale-105 transition-transform">
+                  {b.avatar_url ? (
+                    <img src={b.avatar_url} alt={b.display_name} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm">
+                      {b.display_name?.[0]?.toUpperCase() || "?"}
+                    </div>
+                  )}
+                </div>
+                <span className="text-[11px] text-foreground truncate w-full text-center group-hover:text-primary transition-colors">{b.display_name?.split(" ")[0]}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 

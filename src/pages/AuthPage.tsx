@@ -23,7 +23,7 @@ export default function AuthPage() {
     try {
       if (isSignUp) {
         await signUp(email, password, { display_name: displayName, phone });
-        toast({ title: "Welcome to Ride With Me! 🎉", description: "Check your email to confirm your account." });
+        toast({ title: "Welcome to Ride With Me! 🎉", description: "Your account has been created successfully." });
       } else {
         await signIn(email, password);
         toast({ title: "Welcome back! 🚗" });

@@ -12,6 +12,12 @@ import { Plus, Search } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import UserProfileDialog from "@/components/UserProfileDialog";
 
+const statusColors: Record<string, string> = {
+  available: "bg-green-500",
+  planning: "bg-amber-500",
+  busy: "bg-muted-foreground",
+};
+
 export default function Index() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -27,9 +33,15 @@ export default function Index() {
       .order("created_at", { ascending: false })
       .limit(15)
       .then(({ data }) => { 
-        if (data) setBuddies(data); 
+        if (data) {
+          if (user) {
+            setBuddies(data.filter(b => b.user_id !== user.id));
+          } else {
+            setBuddies(data); 
+          }
+        }
       });
-  }, []);
+  }, [user]);
 
   return (
     <div className="max-w-lg mx-auto pb-24 bg-background min-h-screen px-4">
@@ -89,7 +101,7 @@ export default function Index() {
                     )}
                   </div>
                   {/* Active Indicator */}
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-background z-20" />
+                  <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-background z-20 ${statusColors[b.availability_status || "available"] || statusColors.available}`} />
                 </div>
                 <span className="text-[11px] font-bold text-foreground truncate w-full text-center group-hover:text-primary transition-colors">
                   {b.display_name?.split(" ")[0]}

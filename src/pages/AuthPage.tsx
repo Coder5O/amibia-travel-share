@@ -24,6 +24,7 @@ export default function AuthPage() {
       if (isSignUp) {
         await signUp(email, password, { display_name: displayName, phone });
         toast({ title: "Welcome to VoyageBuddy! 🎉", description: "Your account has been created successfully." });
+        setTimeout(() => window.location.href = '/onboarding', 500);
       } else {
         await signIn(email, password);
         toast({ title: "Welcome back! 🚗" });

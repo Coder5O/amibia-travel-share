@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Calendar, ChevronLeft, ChevronRight, MessageCircle, ShieldCheck, Car, Users, Crown } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
-
+import { useAuth } from "@/contexts/AuthContext";
+import UserProfileDialog from "@/components/UserProfileDialog";
 interface Profile {
   id: string;
   user_id: string;
@@ -39,10 +40,12 @@ function formatDate(d: string | null) {
 }
 
 export default function BuddySlideshow() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
@@ -52,9 +55,15 @@ export default function BuddySlideshow() {
       .order("created_at", { ascending: false })
       .limit(20)
       .then(({ data }) => {
-        if (data) setProfiles(data as any);
+        if (data) {
+          if (user) {
+            setProfiles(data.filter((p: any) => p.user_id !== user.id) as any);
+          } else {
+            setProfiles(data as any);
+          }
+        }
       });
-  }, []);
+  }, [user]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -146,13 +155,12 @@ export default function BuddySlideshow() {
                   )}
                 </div>
 
-                {/* Action */}
                 <div className="px-5 pb-8">
                   <button
-                    onClick={() => navigate("/chat")}
+                    onClick={() => setSelectedUserId(current.user_id)}
                     className="w-full py-2.5 rounded-xl gradient-sunset text-primary-foreground text-sm font-semibold inline-flex items-center justify-center gap-2 shadow-sm hover:scale-[1.02] transition-transform"
                   >
-                    <MessageCircle className="w-4 h-4" /> Message {current.display_name.split(" ")[0]}
+                    <MessageCircle className="w-4 h-4" /> View Profile
                   </button>
                 </div>
               </div>
@@ -183,6 +191,8 @@ export default function BuddySlideshow() {
           />
         ))}
       </div>
+
+      <UserProfileDialog open={!!selectedUserId} onOpenChange={(o) => !o && setSelectedUserId(null)} userId={selectedUserId} />
     </div>
   );
 }

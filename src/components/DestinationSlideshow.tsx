@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Star, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Star, Eye } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 
 interface Location {
   id: string;
@@ -19,7 +20,7 @@ const filterTabs = [
   { key: "most_visited", label: "🔥 Most Visited" },
   { key: "top_rated", label: "⭐ Top Rated" },
   { key: "restaurant", label: "🍽️ Restaurants" },
-  { key: "nightlife", label: "🎶 Nightlife" },
+  { key: "club", label: "🎶 Nightlife" },
   { key: "nature", label: "🏞️ Nature" },
   { key: "cultural", label: "🏛️ Cultural" },
 ];
@@ -28,7 +29,7 @@ export default function DestinationSlideshow() {
   const navigate = useNavigate();
   const [locations, setLocations] = useState<Location[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, align: "start" });
 
   useEffect(() => {
     supabase.from("locations").select("*").then(({ data }) => {
@@ -43,22 +44,12 @@ export default function DestinationSlideshow() {
       : activeFilter === "top_rated"
         ? [...locations].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 10)
         : locations.filter((l) => l.category === activeFilter);
-  const current = filtered[currentIndex];
-
-  const next = () => setCurrentIndex((i) => (i + 1) % filtered.length);
-  const prev = () => setCurrentIndex((i) => (i - 1 + filtered.length) % filtered.length);
 
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [activeFilter]);
+    if (emblaApi) emblaApi.scrollTo(0);
+  }, [activeFilter, emblaApi]);
 
-  useEffect(() => {
-    if (filtered.length <= 1) return;
-    const timer = setInterval(next, 5000);
-    return () => clearInterval(timer);
-  }, [filtered.length, currentIndex]);
-
-  if (!current) return null;
+  if (filtered.length === 0) return null;
 
   return (
     <div className="space-y-4">
@@ -79,52 +70,33 @@ export default function DestinationSlideshow() {
         ))}
       </div>
 
-      {/* Slideshow */}
-      <div className="relative rounded-2xl overflow-hidden group aspect-[16/9]">
-        <button
-          onClick={() => navigate(`/location/${current.id}`)}
-          className="absolute inset-0 w-full h-full"
-          aria-label={`View ${current.name}`}
-        >
-          <img
-            src={current.image_url || ""}
-            alt={current.name}
-            className="w-full h-full object-cover transition-all duration-700"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
-        </button>
-
-        <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
-          <h3 className="text-2xl font-bold text-primary-foreground mb-1">{current.name}</h3>
-          <p className="text-primary-foreground/80 text-sm mb-3 line-clamp-2">{current.description}</p>
-          <div className="flex items-center gap-4 text-primary-foreground/70 text-xs">
-            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{current.region}</span>
-            <span className="flex items-center gap-1"><Star className="w-3 h-3 fill-accent text-accent" />{current.rating}</span>
-            <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{current.visit_count?.toLocaleString()} visits</span>
-          </div>
-        </div>
-
-        {/* Nav arrows */}
-        {filtered.length > 1 && (
-          <>
-            <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <ChevronLeft className="w-4 h-4 text-foreground" />
-            </button>
-            <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <ChevronRight className="w-4 h-4 text-foreground" />
-            </button>
-          </>
-        )}
-
-        {/* Dots */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-          {filtered.map((_, i) => (
+      {/* Swipable Carousel */}
+      <div className="overflow-hidden -mx-4 px-4" ref={emblaRef}>
+        <div className="flex gap-4 touch-pan-x pb-4">
+          {filtered.map((loc) => (
             <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={`w-2 h-2 rounded-full transition-all ${i === currentIndex ? "bg-primary-foreground w-4" : "bg-primary-foreground/40"}`}
-            />
+              key={loc.id}
+              onClick={() => navigate(`/location/${loc.id}`)}
+              className="flex-shrink-0 w-64 group relative rounded-2xl overflow-hidden aspect-[4/3] shadow-md border border-border"
+              aria-label={`View ${loc.name}`}
+            >
+              <img
+                src={loc.image_url || ""}
+                alt={loc.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
+                <h3 className="text-lg font-bold text-white mb-1 leading-tight">{loc.name}</h3>
+                <div className="flex items-center gap-3 text-white/80 text-[10px] font-medium">
+                  {loc.region && <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />{loc.region}</span>}
+                  {loc.rating && <span className="flex items-center gap-0.5 text-accent"><Star className="w-3 h-3 fill-accent" />{loc.rating}</span>}
+                  {loc.visit_count != null && <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" />{loc.visit_count}</span>}
+                </div>
+              </div>
+            </button>
           ))}
         </div>
       </div>

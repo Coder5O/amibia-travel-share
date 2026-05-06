@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, MapPin, Star, Eye, Bookmark, Share2, Users, Calendar, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useEmblaCarousel from "embla-carousel-react";
+import UserProfileDialog from "@/components/UserProfileDialog";
 
 interface Location {
   id: string;
@@ -35,6 +36,7 @@ export default function LocationDetailPage() {
   const [nearbyBuddies, setNearbyBuddies] = useState<Profile[]>([]);
   const [saved, setSaved] = useState(false);
   const [savedRowId, setSavedRowId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   
   const [emblaRef] = useEmblaCarousel({ loop: true });
 
@@ -51,7 +53,13 @@ export default function LocationDetailPage() {
       .select("*")
       .limit(5)
       .then(({ data }) => {
-        if (data) setNearbyBuddies(data as any);
+        if (data) {
+          if (user) {
+            setNearbyBuddies(data.filter((b: any) => b.user_id !== user.id) as any);
+          } else {
+            setNearbyBuddies(data as any);
+          }
+        }
       });
 
     if (user) {
@@ -204,10 +212,10 @@ export default function LocationDetailPage() {
                 </div>
                 <span className="text-[11px] font-bold text-foreground truncate w-full text-center">{buddy.display_name.split(" ")[0]}</span>
                 <button 
-                  onClick={() => navigate("/chat")}
-                  className="w-full py-1.5 rounded-lg bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center gap-1"
+                  onClick={() => setSelectedUserId((buddy as any).user_id)}
+                  className="w-full py-1.5 rounded-lg bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center gap-1 hover:bg-primary/20 transition-colors"
                 >
-                  <MessageCircle className="w-3 h-3" /> Chat
+                  <MessageCircle className="w-3 h-3" /> Profile
                 </button>
               </div>
             ))}
@@ -231,6 +239,8 @@ export default function LocationDetailPage() {
           </div>
         </section>
       </div>
+
+      <UserProfileDialog open={!!selectedUserId} onOpenChange={(o) => !o && setSelectedUserId(null)} userId={selectedUserId} />
     </div>
   );
 }

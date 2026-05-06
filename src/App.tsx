@@ -13,6 +13,7 @@ import ChatPage from "./pages/ChatPage";
 import ProfilePage from "./pages/ProfilePage";
 import LocationDetailPage from "./pages/LocationDetailPage";
 import SavedPlacesPage from "./pages/SavedPlacesPage";
+import OnboardingPage from "./pages/OnboardingPage";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 import SOSButton from "./components/SOSButton";
@@ -47,6 +48,7 @@ function AppRoutes() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/location/:id" element={<LocationDetailPage />} />
           <Route path="/saved" element={<SavedPlacesPage />} />
+          <Route path="/onboarding" element={<OnboardingPage onComplete={() => window.location.href = '/'} />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

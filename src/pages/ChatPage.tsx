@@ -31,6 +31,12 @@ export default function ChatPage() {
   const [showNewChat, setShowNewChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const statusColors: Record<string, string> = {
+    available: "bg-green-500",
+    planning: "bg-amber-500",
+    busy: "bg-muted-foreground",
+  };
+
   useEffect(() => {
     if (user) {
       loadConversations();
@@ -114,6 +120,27 @@ export default function ChatPage() {
 
   const startConversation = async (otherUserId: string) => {
     if (!user) return;
+    
+    // Check if conversation already exists
+    const { data: myConvos } = await supabase
+      .from("conversation_participants")
+      .select("conversation_id")
+      .eq("user_id", user.id);
+
+    const { data: theirConvos } = await supabase
+      .from("conversation_participants")
+      .select("conversation_id")
+      .eq("user_id", otherUserId);
+
+    const myIds = new Set(myConvos?.map(c => c.conversation_id) || []);
+    const commonConvo = theirConvos?.find(c => myIds.has(c.conversation_id));
+
+    if (commonConvo) {
+      setShowNewChat(false);
+      setActiveConvo(commonConvo.conversation_id);
+      return;
+    }
+
     // Create conversation
     const { data: convo } = await supabase.from("conversations").insert({}).select().single();
     if (!convo) return;
@@ -161,8 +188,9 @@ export default function ChatPage() {
                   onClick={() => startConversation(profile.user_id)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
                 >
-                  <div className="w-10 h-10 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm relative">
                     {profile.display_name?.[0]?.toUpperCase() || "?"}
+                    <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background z-20 ${statusColors[profile.availability_status || "available"] || statusColors.available}`} />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-sm text-foreground">{profile.display_name}</p>

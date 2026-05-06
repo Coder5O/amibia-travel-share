@@ -70,7 +70,8 @@ export default function TripBoardPage() {
   useEffect(() => { if (user) loadParticipantData(); }, [user, trips.length]);
 
   const loadTrips = async () => {
-    const { data } = await supabase.from("trips").select("*").eq("status", "open").order("departure_date", { ascending: true });
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await supabase.from("trips").select("*").eq("status", "open").gte("departure_date", today).order("departure_date", { ascending: true });
     if (data) {
       const userIds = [...new Set(data.map((t) => t.user_id))];
       const { data: profiles } = userIds.length ? await supabase.from("profiles").select("user_id, display_name, category, avatar_url").in("user_id", userIds) : { data: [] };

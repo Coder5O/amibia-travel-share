@@ -1,5 +1,8 @@
 import { Home, Search, Map, MessageCircle, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const tabs = [
   { path: "/", icon: Home, label: "Home" },
@@ -12,6 +15,47 @@ const tabs = [
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const checkUnread = async () => {
+      // Find all conversations where user is a participant
+      const { data: participants } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", user.id);
+        
+      if (!participants?.length) return;
+      const convoIds = participants.map((p) => p.conversation_id);
+      
+      // Count unread messages not from the user
+      const { count } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .in("conversation_id", convoIds)
+        .neq("sender_id", user.id)
+        .eq("read", false);
+        
+      setUnreadCount(count || 0);
+    };
+
+    checkUnread();
+
+    const channel = supabase
+      .channel('public:messages')
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => {
+        checkUnread();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, () => {
+        checkUnread();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50">
@@ -22,9 +66,14 @@ export default function BottomNav() {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center gap-0.5 transition-colors py-1 px-3 ${active ? "text-primary" : "text-muted-foreground"}`}
+              className={`flex flex-col items-center gap-0.5 transition-colors py-1 px-3 relative ${active ? "text-primary" : "text-muted-foreground"}`}
             >
-              <tab.icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
+              <div className="relative">
+                <tab.icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />
+                {tab.path === "/chat" && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 border border-background" />
+                )}
+              </div>
               <span className="text-[10px] font-medium">{tab.label}</span>
             </button>
           );

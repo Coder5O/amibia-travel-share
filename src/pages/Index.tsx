@@ -8,7 +8,7 @@ import CreatePostDialog from "@/components/CreatePostDialog";
 import TopRatedTravelers from "@/components/TopRatedTravelers";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 
 export default function Index() {
@@ -17,85 +17,129 @@ export default function Index() {
   const [buddies, setBuddies] = useState<any[]>([]);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [feedKey, setFeedKey] = useState(0);
-  const [emblaRef] = useEmblaCarousel({ dragFree: true });
+  const [emblaRef] = useEmblaCarousel({ dragFree: true, align: "start" });
 
   useEffect(() => {
-    supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(20)
-      .then(({ data }) => { if (data) setBuddies(data); });
+    supabase.from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(15)
+      .then(({ data }) => { 
+        if (data) setBuddies(data); 
+      });
   }, []);
 
   return (
-    <div className="max-w-lg mx-auto pb-24">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <img src={logo} alt="Ride With Me" className="w-8 h-8" width={512} height={512} />
-        <h1 className="text-xl font-bold text-gradient-sunset">Ride With Me</h1>
-      </div>
-
-      {/* Destinations */}
-      <section className="mb-6">
-        <h2 className="text-base font-semibold text-foreground mb-3">Discover Namibia 🇳🇦</h2>
-        <DestinationSlideshow />
-      </section>
-
-      {/* Featured travel buddy slideshow */}
-      <section className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-foreground">Featured Travel Buddy</h2>
-          <button onClick={() => navigate("/search")} className="text-xs text-primary font-medium">See all</button>
+    <div className="max-w-lg mx-auto pb-24 bg-background min-h-screen px-4">
+      {/* Header / Search Bar Style */}
+      <header className="flex items-center justify-between pt-6 mb-8">
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 rounded-2xl gradient-sunset flex items-center justify-center shadow-lg shadow-primary/20">
+            <img src={logo} alt="L" className="w-6 h-6 invert brightness-0" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-foreground tracking-tight leading-none">RideWithMe</h1>
+            <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Namibia 🇳🇦</span>
+          </div>
         </div>
-        <BuddySlideshow />
-      </section>
+        <button 
+          onClick={() => navigate("/search")}
+          className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+        >
+          <Search className="w-5 h-5 text-foreground" />
+        </button>
+      </header>
 
-      {/* Horizontal buddy scroll with Embla */}
-      <section className="mb-6">
-        <h2 className="text-base font-semibold text-foreground mb-3">More Buddies</h2>
+      {/* Stories Style Buddy Scroll */}
+      <section className="mb-8 -mx-4 px-4">
+        <div className="flex items-center justify-between mb-4 px-1">
+          <h2 className="text-lg font-bold text-foreground">Travel Buddies</h2>
+          <button onClick={() => navigate("/search")} className="text-xs font-bold text-primary">See all</button>
+        </div>
         <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-3 touch-pan-x pb-2 px-1">
-            {buddies.map((b) => (
-              <button key={b.id} onClick={() => navigate("/chat")} className="flex-shrink-0 flex flex-col items-center gap-1 w-16 group">
-                <div className="w-14 h-14 rounded-full border-2 border-primary p-0.5 shadow-sm group-hover:scale-105 transition-transform">
-                  {b.avatar_url ? (
-                    <img src={b.avatar_url} alt={b.display_name} className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm">
-                      {b.display_name?.[0]?.toUpperCase() || "?"}
-                    </div>
-                  )}
+          <div className="flex gap-4 touch-pan-x pb-2">
+            {/* Add 'My Story' placeholder if user is logged in */}
+            {user && (
+              <div className="flex-shrink-0 flex flex-col items-center gap-2 w-16">
+                <div className="w-16 h-16 rounded-2xl bg-muted border-2 border-dashed border-muted-foreground/30 flex items-center justify-center group cursor-pointer relative overflow-hidden">
+                  <Plus className="w-6 h-6 text-muted-foreground group-hover:scale-110 transition-transform" />
+                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <span className="text-[11px] text-foreground truncate w-full text-center group-hover:text-primary transition-colors">{b.display_name?.split(" ")[0]}</span>
+                <span className="text-[11px] font-semibold text-muted-foreground text-center">Me</span>
+              </div>
+            )}
+            
+            {buddies.map((b) => (
+              <button 
+                key={b.id} 
+                onClick={() => navigate("/chat")} 
+                className="flex-shrink-0 flex flex-col items-center gap-2 w-16 group"
+              >
+                <div className="w-16 h-16 rounded-2xl p-0.5 relative group-hover:scale-105 transition-transform duration-300">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary via-accent to-primary-foreground opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <div className="w-full h-full rounded-[14px] bg-background p-0.5 relative z-10">
+                    {b.avatar_url ? (
+                      <img src={b.avatar_url} alt={b.display_name} className="w-full h-full rounded-[12px] object-cover" />
+                    ) : (
+                      <div className="w-full h-full rounded-[12px] gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-xl">
+                        {b.display_name?.[0]?.toUpperCase() || "?"}
+                      </div>
+                    )}
+                  </div>
+                  {/* Active Indicator */}
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-background z-20" />
+                </div>
+                <span className="text-[11px] font-bold text-foreground truncate w-full text-center group-hover:text-primary transition-colors">
+                  {b.display_name?.split(" ")[0]}
+                </span>
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Top rated travelers by activity */}
-      <section className="mb-6">
-        <TopRatedTravelers />
+      {/* Featured Destination */}
+      <section className="mb-8">
+        <h2 className="text-lg font-bold text-foreground mb-4">Discover Gems</h2>
+        <DestinationSlideshow />
       </section>
 
-      {/* Feed */}
+      {/* Main Slideshow */}
+      <section className="mb-10">
+        <h2 className="text-lg font-bold text-foreground mb-4">Top Matches</h2>
+        <BuddySlideshow />
+      </section>
+
+      {/* Community Feed */}
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-foreground">Travel Feed</h2>
-          <button onClick={() => setShowCreatePost(true)} className="text-xs text-primary font-medium flex items-center gap-1">
-            <Plus className="w-3.5 h-3.5" /> New Post
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-foreground">Community</h2>
+          <button 
+            onClick={() => setShowCreatePost(true)} 
+            className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center gap-1.5 hover:bg-primary/20 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" /> Share Moment
           </button>
         </div>
-        <PostFeed key={feedKey} />
+        <div className="bg-card rounded-3xl overflow-hidden border border-border shadow-sm p-2">
+          <PostFeed key={feedKey} />
+        </div>
       </section>
 
-      {/* Floating Create Post button */}
+      {/* Floating Action Button */}
       <button
         onClick={() => setShowCreatePost(true)}
         aria-label="Create post"
-        className="fixed bottom-20 right-4 w-14 h-14 rounded-full gradient-sunset shadow-lg flex items-center justify-center z-40 hover:scale-105 transition-transform"
+        className="fixed bottom-24 right-6 w-14 h-14 rounded-2xl gradient-sunset shadow-xl shadow-primary/30 flex items-center justify-center z-40 hover:scale-110 active:scale-95 transition-all"
       >
-        <Plus className="w-6 h-6 text-primary-foreground" />
+        <Plus className="w-7 h-7 text-primary-foreground" />
       </button>
 
-      <CreatePostDialog open={showCreatePost} onOpenChange={setShowCreatePost} onCreated={() => setFeedKey((k) => k + 1)} />
+      <CreatePostDialog 
+        open={showCreatePost} 
+        onOpenChange={setShowCreatePost} 
+        onCreated={() => setFeedKey((k) => k + 1)} 
+      />
     </div>
   );
 }

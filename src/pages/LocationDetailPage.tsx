@@ -80,7 +80,7 @@ export default function LocationDetailPage() {
     if (navigator.share) {
       try { await navigator.share({ title: location.name, text: location.description || "" }); } catch {}
     } else {
-      navigator.clipboard.writeText(`${location.name} — Ride With Me`);
+      navigator.clipboard.writeText(`${location.name} — VoyageBuddy`);
       toast({ title: "Copied to clipboard" });
     }
   };

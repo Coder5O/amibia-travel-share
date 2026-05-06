@@ -28,10 +28,10 @@ export default function LandingPage({ onGetStarted }: Props) {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
         <div className="relative max-w-lg mx-auto px-6 pt-16 pb-12 text-center">
-          <img src={logo} alt="Ride With Me" className="w-16 h-16 mx-auto mb-4" width={512} height={512} />
-          <h1 className="text-4xl font-bold text-gradient-sunset mb-3">Ride With Me</h1>
+          <img src={logo} alt="VoyageBuddy" className="w-16 h-16 mx-auto mb-4" width={512} height={512} />
+          <h1 className="text-4xl font-bold text-gradient-sunset mb-3">VoyageBuddy</h1>
           <p className="text-base text-muted-foreground mb-6 leading-relaxed">
-            Namibia's social travel app — find buddies, share rides and explore the country together.
+            Namibia's social travel app — find buddies, share rides and explore the country together with VoyageBuddy.
           </p>
           <Button onClick={onGetStarted} size="lg" className="gradient-sunset text-primary-foreground px-10 shadow-lg">
             Get Started
@@ -42,7 +42,7 @@ export default function LandingPage({ onGetStarted }: Props) {
 
       {/* Highlights */}
       <section className="max-w-lg mx-auto px-6 py-8 space-y-4">
-        <h2 className="text-xl font-bold text-foreground text-center mb-2">Why Ride With Me?</h2>
+        <h2 className="text-xl font-bold text-foreground text-center mb-2">Why VoyageBuddy?</h2>
         {highlights.map((h) => (
           <div key={h.title} className="flex gap-4 p-4 rounded-2xl bg-card border border-border">
             <div className="w-12 h-12 rounded-xl gradient-sunset flex items-center justify-center flex-shrink-0">

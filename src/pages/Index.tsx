@@ -38,7 +38,7 @@ export default function Index() {
             <img src={logo} alt="L" className="w-6 h-6 invert brightness-0" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-foreground tracking-tight leading-none">RideWithMe</h1>
+            <h1 className="text-xl font-black text-foreground tracking-tight leading-none">VoyageBuddy</h1>
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Namibia 🇳🇦</span>
           </div>
         </div>

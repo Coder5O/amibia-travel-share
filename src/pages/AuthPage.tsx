@@ -23,7 +23,7 @@ export default function AuthPage() {
     try {
       if (isSignUp) {
         await signUp(email, password, { display_name: displayName, phone });
-        toast({ title: "Welcome to Ride With Me! 🎉", description: "Your account has been created successfully." });
+        toast({ title: "Welcome to VoyageBuddy! 🎉", description: "Your account has been created successfully." });
       } else {
         await signIn(email, password);
         toast({ title: "Welcome back! 🚗" });
@@ -42,8 +42,8 @@ export default function AuthPage() {
         <img src={heroImage} alt="Namibian desert" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         <div className="absolute top-6 left-6 flex items-center gap-2">
-          <img src={logo} alt="Ride With Me" className="w-10 h-10" />
-          <span className="text-xl font-bold text-primary-foreground drop-shadow-lg">Ride With Me</span>
+          <img src={logo} alt="VoyageBuddy" className="w-10 h-10" />
+          <span className="text-xl font-bold text-primary-foreground drop-shadow-lg">VoyageBuddy</span>
         </div>
       </div>
 
@@ -53,7 +53,7 @@ export default function AuthPage() {
           <img src={heroImage} alt="Namibian desert dunes" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 gradient-hero opacity-60" />
           <div className="relative z-10 flex flex-col justify-end p-12">
-            <h1 className="text-5xl font-bold text-primary-foreground mb-4">Ride With Me</h1>
+            <h1 className="text-5xl font-bold text-primary-foreground mb-4">VoyageBuddy</h1>
             <p className="text-xl text-primary-foreground/90 max-w-md">Find your perfect travel buddy in Namibia.</p>
           </div>
         </div>
@@ -107,7 +107,7 @@ function FormContent({ isSignUp, setIsSignUp, email, setEmail, password, setPass
       </form>
 
       <p className="text-center text-sm text-muted-foreground mt-6">
-        {isSignUp ? "Already have an account?" : "New to Ride With Me?"}{" "}
+        {isSignUp ? "Already have an account?" : "New to VoyageBuddy?"}{" "}
         <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary font-medium hover:underline">
           {isSignUp ? "Sign In" : "Sign Up"}
         </button>

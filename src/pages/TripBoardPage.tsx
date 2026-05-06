@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Calendar, Users, DollarSign, Plus, X, Calculator, Check, Clock } from "lucide-react";
+import { MapPin, Calendar, Users, DollarSign, Plus, X, Calculator, Check, Clock, Edit2 } from "lucide-react";
+import UserProfileDialog from "@/components/UserProfileDialog";
 
 interface Trip {
   id: string;
@@ -20,9 +21,24 @@ interface Trip {
   description: string | null;
   region: string | null;
   status: string;
+  trip_type?: string | null;
+  departure_time?: string | null;
   created_at: string;
-  profile?: { display_name: string; category: string };
+  profile?: { display_name: string; category: string; avatar_url: string | null };
 }
+
+const WINDHOEK_CLUBS = [
+  "Brewers Market",
+  "The Boiler Room (Warehouse Theatre)",
+  "Chopsi's Bar",
+  "XS Lounge",
+  "The Social Club",
+  "Vinyls Music Lounge",
+  "Joe's Beerhouse",
+  "Stratos Restaurant and Bar",
+  "Mynt Nightclub",
+  "Other"
+];
 
 export default function TripBoardPage() {
   const { user } = useAuth();
@@ -31,13 +47,18 @@ export default function TripBoardPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [showCalc, setShowCalc] = useState<string | null>(null);
   const [calcPeople, setCalcPeople] = useState(2);
+  const [editingTripId, setEditingTripId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [form, setForm] = useState({
     destination: "",
+    custom_destination: "",
     departure_date: "",
+    departure_time: "",
     return_date: "",
     available_seats: "2",
     budget: "",
     cost_split_method: "equal",
+    trip_type: "Day Trip",
     description: "",
     region: "",
   });
@@ -52,7 +73,7 @@ export default function TripBoardPage() {
     const { data } = await supabase.from("trips").select("*").eq("status", "open").order("departure_date", { ascending: true });
     if (data) {
       const userIds = [...new Set(data.map((t) => t.user_id))];
-      const { data: profiles } = userIds.length ? await supabase.from("profiles").select("user_id, display_name, category").in("user_id", userIds) : { data: [] };
+      const { data: profiles } = userIds.length ? await supabase.from("profiles").select("user_id, display_name, category, avatar_url").in("user_id", userIds) : { data: [] };
       const profileMap = new Map((profiles || []).map((p) => [p.user_id, p] as const));
       setTrips(data.map((t) => ({ ...t, profile: profileMap.get(t.user_id) as any })));
     }
@@ -93,27 +114,67 @@ export default function TripBoardPage() {
     loadParticipantData();
   };
 
-  const createTrip = async () => {
-    if (!user || !form.destination || !form.departure_date) return;
-    const { error } = await supabase.from("trips").insert({
+  const createOrUpdateTrip = async () => {
+    const finalDest = form.destination === "Other" ? form.custom_destination : form.destination;
+    if (!user || !finalDest || !form.departure_date) return;
+
+    const payload = {
       user_id: user.id,
-      destination: form.destination,
+      destination: finalDest,
       departure_date: form.departure_date,
+      departure_time: form.departure_time || null,
       return_date: form.return_date || null,
       available_seats: parseInt(form.available_seats) || 2,
       budget: form.budget ? parseFloat(form.budget) : null,
       cost_split_method: form.cost_split_method,
+      trip_type: form.trip_type,
       description: form.description || null,
       region: form.region || null,
-    });
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    };
+
+    if (editingTripId) {
+      const { error } = await supabase.from("trips").update(payload).eq("id", editingTripId);
+      if (error) toast({ title: "Error updating", description: error.message, variant: "destructive" });
+      else {
+        toast({ title: "Trip updated! 🗺️" });
+        resetForm();
+        loadTrips();
+      }
     } else {
-      toast({ title: "Trip posted! 🗺️" });
-      setShowCreate(false);
-      setForm({ destination: "", departure_date: "", return_date: "", available_seats: "2", budget: "", cost_split_method: "equal", description: "", region: "" });
-      loadTrips();
+      const { error } = await supabase.from("trips").insert(payload);
+      if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+      else {
+        toast({ title: "Trip posted! 🗺️" });
+        resetForm();
+        loadTrips();
+      }
     }
+  };
+
+  const resetForm = () => {
+    setShowCreate(false);
+    setEditingTripId(null);
+    setForm({ destination: "", custom_destination: "", departure_date: "", departure_time: "", return_date: "", available_seats: "2", budget: "", cost_split_method: "equal", trip_type: "Day Trip", description: "", region: "" });
+  };
+
+  const startEdit = (trip: Trip) => {
+    const isPreset = WINDHOEK_CLUBS.includes(trip.destination);
+    setForm({
+      destination: isPreset ? trip.destination : "Other",
+      custom_destination: isPreset ? "" : trip.destination,
+      departure_date: trip.departure_date,
+      departure_time: trip.departure_time || "",
+      return_date: trip.return_date || "",
+      available_seats: String(trip.available_seats),
+      budget: trip.budget ? String(trip.budget) : "",
+      cost_split_method: trip.cost_split_method || "equal",
+      trip_type: trip.trip_type || "Day Trip",
+      description: trip.description || "",
+      region: trip.region || "",
+    });
+    setEditingTripId(trip.id);
+    setShowCreate(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const categoryEmoji: Record<string, string> = { has_means: "🚗", needs_ride: "🙋", has_both: "👑" };
@@ -122,7 +183,7 @@ export default function TripBoardPage() {
     <div className="max-w-lg mx-auto pb-24">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-foreground">Trip Board</h2>
-        <Button size="sm" onClick={() => setShowCreate(!showCreate)} className="gradient-sunset text-primary-foreground">
+        <Button size="sm" onClick={() => { if(showCreate) resetForm(); else setShowCreate(true); }} className="gradient-sunset text-primary-foreground">
           {showCreate ? <X className="w-4 h-4" /> : <><Plus className="w-4 h-4 mr-1" /> Post Trip</>}
         </Button>
       </div>
@@ -131,12 +192,37 @@ export default function TripBoardPage() {
         <div className="bg-card rounded-2xl border border-border p-4 mb-6 animate-slide-in space-y-3">
           <div>
             <Label>Destination</Label>
-            <Input value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} placeholder="Sossusvlei" />
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              value={form.destination}
+              onChange={(e) => setForm({ ...form, destination: e.target.value })}
+            >
+              <option value="" disabled>Select a destination</option>
+              {WINDHOEK_CLUBS.map(club => <option key={club} value={club}>{club}</option>)}
+            </select>
+            {form.destination === "Other" && (
+              <Input className="mt-2" value={form.custom_destination} onChange={(e) => setForm({ ...form, custom_destination: e.target.value })} placeholder="Type custom destination" />
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Trip Type</Label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {["Day Trip", "Weekend", "Road Trip", "Lunch", "Dinner", "Club", "Long Haul"].map((t) => (
+                <button key={t} type="button" onClick={() => setForm({ ...form, trip_type: t })}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${form.trip_type === t ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <Label>Departure</Label>
               <Input type="date" value={form.departure_date} onChange={(e) => setForm({ ...form, departure_date: e.target.value })} />
+            </div>
+            <div>
+              <Label>Time</Label>
+              <Input type="time" value={form.departure_time} onChange={(e) => setForm({ ...form, departure_time: e.target.value })} />
             </div>
             <div>
               <Label>Return</Label>
@@ -171,7 +257,9 @@ export default function TripBoardPage() {
             <Label>Description</Label>
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Weekend road trip..." rows={2} className="resize-none" />
           </div>
-          <Button onClick={createTrip} className="w-full gradient-sunset text-primary-foreground">Post Trip</Button>
+          <Button onClick={createOrUpdateTrip} className="w-full gradient-sunset text-primary-foreground">
+            {editingTripId ? "Save Trip" : "Post Trip"}
+          </Button>
         </div>
       )}
 
@@ -179,19 +267,33 @@ export default function TripBoardPage() {
         {trips.map((trip) => (
           <div key={trip.id} className="bg-card rounded-2xl border border-border p-4 animate-fade-in">
             <div className="flex items-start justify-between mb-2">
-              <div>
-                <h3 className="font-bold text-foreground flex items-center gap-1">
-                  <MapPin className="w-4 h-4 text-primary" /> {trip.destination}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {categoryEmoji[trip.profile?.category || ""] || ""} {trip.profile?.display_name || "Traveler"}
-                </p>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setSelectedUserId(trip.user_id)}>
+                  {trip.profile?.avatar_url ? (
+                    <img src={trip.profile.avatar_url} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-border" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm">
+                      {trip.profile?.display_name?.[0]?.toUpperCase() || "?"}
+                    </div>
+                  )}
+                </button>
+                <div>
+                  <h3 className="font-bold text-foreground flex items-center gap-1">
+                    <MapPin className="w-4 h-4 text-primary" /> {trip.destination}
+                  </h3>
+                  <button onClick={() => setSelectedUserId(trip.user_id)} className="text-xs text-muted-foreground mt-0.5 text-left hover:underline">
+                    {categoryEmoji[trip.profile?.category || ""] || ""} {trip.profile?.display_name || "Traveler"}
+                  </button>
+                </div>
               </div>
               <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">{trip.status}</span>
             </div>
 
             <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-2">
-              <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(trip.departure_date).toLocaleDateString()}</span>
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" /> {new Date(trip.departure_date).toLocaleDateString()} {trip.departure_time ? `at ${trip.departure_time}` : ""}
+              </span>
+              {trip.trip_type && <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-secondary/50 font-medium text-secondary-foreground">{trip.trip_type}</span>}
               <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {trip.available_seats} seats</span>
               {trip.budget && <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> N${trip.budget}</span>}
             </div>
@@ -202,6 +304,12 @@ export default function TripBoardPage() {
               <Button size="sm" variant="outline" onClick={() => setShowCalc(showCalc === trip.id ? null : trip.id)} className="text-xs">
                 <Calculator className="w-3 h-3 mr-1" /> Split Cost
               </Button>
+
+              {user && trip.user_id === user.id && (
+                <Button size="sm" variant="ghost" onClick={() => startEdit(trip)} className="text-xs text-muted-foreground hover:text-foreground">
+                  <Edit2 className="w-3 h-3 mr-1" /> Edit
+                </Button>
+              )}
 
               {user && trip.user_id !== user.id && (
                 myRequests[trip.id] === "pending" ? (
@@ -258,6 +366,7 @@ export default function TripBoardPage() {
           <p className="text-center text-muted-foreground py-12">No trips posted yet. Be the first!</p>
         )}
       </div>
+      <UserProfileDialog open={!!selectedUserId} onOpenChange={(o) => !o && setSelectedUserId(null)} userId={selectedUserId} />
     </div>
   );
 }

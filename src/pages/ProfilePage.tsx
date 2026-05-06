@@ -275,19 +275,23 @@ export default function ProfilePage() {
       <div className="px-4 space-y-4">
         {editing ? (
           <div className="space-y-4 animate-fade-in">
-            {/* Avatar upload */}
-            <div className="flex items-center gap-4">
-              <label className="cursor-pointer">
+            <div className="flex flex-col items-center justify-center py-4">
+              <label className="cursor-pointer group relative">
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
                 {(avatarPreview || profile.avatar_url) ? (
-                  <img src={avatarPreview || profile.avatar_url} alt="Avatar" className="w-16 h-16 rounded-full object-cover border-2 border-primary" />
+                  <div className="relative">
+                    <img src={avatarPreview || profile.avatar_url} alt="Avatar" className="w-24 h-24 rounded-full object-cover border-4 border-primary" />
+                    <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Camera className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                  </div>
                 ) : (
-                  <div className="w-16 h-16 rounded-full border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
-                    <Camera className="w-5 h-5 text-muted-foreground" />
+                  <div className="w-24 h-24 rounded-full border-4 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-1 group-hover:border-primary/50 transition-colors">
+                    <Camera className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                 )}
               </label>
-              <div className="text-sm text-muted-foreground">Tap to change photo</div>
+              <p className="text-sm font-medium text-muted-foreground mt-3">Tap to update photo</p>
             </div>
 
             <div><Label>Display Name</Label><Input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} /></div>

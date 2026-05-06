@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, ArrowLeft, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface Conversation {
   id: string;
@@ -22,6 +22,7 @@ interface Message {
 export default function ChatPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvo, setActiveConvo] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -36,6 +37,14 @@ export default function ChatPage() {
       loadAllProfiles();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (location.state?.conversationId) {
+      setActiveConvo(location.state.conversationId);
+      // Clear state so it doesn't stay if we navigate away and back
+      navigate(".", { replace: true, state: {} });
+    }
+  }, [location.state, navigate]);
 
   useEffect(() => {
     if (!activeConvo) return;

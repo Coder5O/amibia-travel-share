@@ -425,12 +425,14 @@ export type Database = {
           cost_split_method: string | null
           created_at: string
           departure_date: string
+          departure_time: string | null
           description: string | null
           destination: string
           id: string
           region: string | null
           return_date: string | null
           status: string
+          trip_type: string | null
           updated_at: string
           user_id: string
         }
@@ -440,12 +442,14 @@ export type Database = {
           cost_split_method?: string | null
           created_at?: string
           departure_date: string
+          departure_time?: string | null
           description?: string | null
           destination: string
           id?: string
           region?: string | null
           return_date?: string | null
           status?: string
+          trip_type?: string | null
           updated_at?: string
           user_id: string
         }
@@ -455,12 +459,14 @@ export type Database = {
           cost_split_method?: string | null
           created_at?: string
           departure_date?: string
+          departure_time?: string | null
           description?: string | null
           destination?: string
           id?: string
           region?: string | null
           return_date?: string | null
           status?: string
+          trip_type?: string | null
           updated_at?: string
           user_id?: string
         }

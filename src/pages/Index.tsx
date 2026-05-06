@@ -10,6 +10,7 @@ import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
+import UserProfileDialog from "@/components/UserProfileDialog";
 
 export default function Index() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export default function Index() {
   const [buddies, setBuddies] = useState<any[]>([]);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [feedKey, setFeedKey] = useState(0);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [emblaRef] = useEmblaCarousel({ dragFree: true, align: "start" });
 
   useEffect(() => {
@@ -72,7 +74,7 @@ export default function Index() {
             {buddies.map((b) => (
               <button 
                 key={b.id} 
-                onClick={() => navigate("/chat")} 
+                onClick={() => setSelectedUserId(b.user_id)} 
                 className="flex-shrink-0 flex flex-col items-center gap-2 w-16 group"
               >
                 <div className="w-16 h-16 rounded-2xl p-0.5 relative group-hover:scale-105 transition-transform duration-300">
@@ -140,6 +142,8 @@ export default function Index() {
         onOpenChange={setShowCreatePost} 
         onCreated={() => setFeedKey((k) => k + 1)} 
       />
+
+      <UserProfileDialog open={!!selectedUserId} onOpenChange={(o) => !o && setSelectedUserId(null)} userId={selectedUserId} />
     </div>
   );
 }

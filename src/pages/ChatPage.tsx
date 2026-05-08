@@ -29,6 +29,7 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
   const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
+  const [loadingProfiles, setLoadingProfiles] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const statusColors: Record<string, string> = {
@@ -114,8 +115,10 @@ export default function ChatPage() {
 
   const loadAllProfiles = async () => {
     if (!user) return;
+    setLoadingProfiles(true);
     const { data } = await supabase.from("profiles").select("*").neq("user_id", user.id);
     if (data) setAllProfiles(data);
+    setLoadingProfiles(false);
   };
 
   const startConversation = async (otherUserId: string) => {
@@ -169,19 +172,27 @@ export default function ChatPage() {
   const categoryBadge: Record<string, string> = { has_means: "🚗", needs_ride: "🙋", has_both: "👑" };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-background">
+    <div className="flex flex-col h-[calc(100vh-4.5rem)] bg-background pb-16">
       {!activeConvo ? (
         <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="sticky top-0 z-20 flex items-center justify-between p-4 border-b border-border bg-background">
             <h2 className="text-lg font-bold text-foreground">Messages</h2>
-            <Button size="icon" variant="ghost" onClick={() => setShowNewChat(true)}>
+            <Button size="icon" variant="ghost" onClick={() => setShowNewChat(!showNewChat)} className="relative z-30" style={{ touchAction: "manipulation" }}>
               <Plus className="w-5 h-5" />
             </Button>
           </div>
 
           {showNewChat ? (
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Start a chat with:</h3>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 pb-24">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-muted-foreground">Start a chat with:</h3>
+                <button onClick={() => setShowNewChat(false)} className="text-xs text-primary font-medium">Cancel</button>
+              </div>
+              {loadingProfiles && (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
               {allProfiles.map((profile) => (
                 <button
                   key={profile.user_id}
@@ -201,7 +212,7 @@ export default function ChatPage() {
               ))}
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto pb-24">
               {conversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8">
                   <p className="text-muted-foreground">No conversations yet</p>

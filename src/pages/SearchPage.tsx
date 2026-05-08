@@ -35,10 +35,14 @@ export default function SearchPage() {
   const [reviewTarget, setReviewTarget] = useState<{ userId: string; name: string } | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => { loadProfiles(); }, []);
+  useEffect(() => { loadProfiles(); }, [user?.id]);
 
   const loadProfiles = async () => {
-    const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+    let query = supabase.from("profiles").select("*").order("created_at", { ascending: false });
+    if (user?.id) {
+      query = query.neq("user_id", user.id);
+    }
+    const { data } = await query;
     if (data) {
       setProfiles(data);
       const userIds = data.map((p) => p.user_id);
@@ -58,6 +62,7 @@ export default function SearchPage() {
   };
 
   const filtered = profiles.filter((p) => {
+    if (user && p.user_id === user.id) return false;
     if (search && !p.display_name?.toLowerCase().includes(search.toLowerCase()) && !p.fun_fact?.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterCategory && p.category !== filterCategory) return false;
     if (filterRegion && p.location !== filterRegion) return false;

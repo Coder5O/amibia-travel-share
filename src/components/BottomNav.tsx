@@ -58,15 +58,16 @@ export default function BottomNav() {
   }, [user]);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50">
-      <div className="max-w-lg mx-auto flex items-center justify-around h-14">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <div className="max-w-lg mx-auto flex items-center justify-around h-[4.5rem]">
         {tabs.map((tab) => {
           const active = location.pathname === tab.path;
           return (
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-col items-center gap-0.5 transition-colors py-1 px-3 relative ${active ? "text-primary" : "text-muted-foreground"}`}
+              className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors py-2 px-2 relative min-h-[3rem] ${active ? "text-primary" : "text-muted-foreground"}`}
+              style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
             >
               <div className="relative">
                 <tab.icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />

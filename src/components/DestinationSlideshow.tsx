@@ -20,7 +20,7 @@ const filterTabs = [
   { key: "most_visited", label: "🔥 Most Visited" },
   { key: "top_rated", label: "⭐ Top Rated" },
   { key: "restaurant", label: "🍽️ Restaurants" },
-  { key: "club", label: "🎶 Nightlife" },
+  { key: "nightlife", label: "🎶 Nightlife" },
   { key: "nature", label: "🏞️ Nature" },
   { key: "cultural", label: "🏛️ Cultural" },
 ];
@@ -37,19 +37,28 @@ export default function DestinationSlideshow() {
     });
   }, []);
 
+  const categoryAliases: Record<string, string[]> = {
+    nightlife: ["club", "clubs", "nightlife"],
+    nature: ["nature", "outdoors"],
+    restaurant: ["restaurant", "restaurants", "food"],
+    cultural: ["cultural", "culture", "history"],
+  };
+
   const filtered = activeFilter === "all"
     ? locations
     : activeFilter === "most_visited"
       ? [...locations].sort((a, b) => (b.visit_count || 0) - (a.visit_count || 0)).slice(0, 10)
       : activeFilter === "top_rated"
         ? [...locations].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 10)
-        : locations.filter((l) => l.category === activeFilter);
+        : locations.filter((l) => {
+            const aliases = categoryAliases[activeFilter] || [activeFilter];
+            const normalizedCategory = (l.category || "").toLowerCase().trim();
+            return aliases.includes(normalizedCategory);
+          });
 
   useEffect(() => {
     if (emblaApi) emblaApi.scrollTo(0);
   }, [activeFilter, emblaApi]);
-
-  if (filtered.length === 0) return null;
 
   return (
     <div className="space-y-4">
@@ -70,36 +79,46 @@ export default function DestinationSlideshow() {
         ))}
       </div>
 
-      {/* Swipable Carousel */}
-      <div className="overflow-hidden -mx-4 px-4" ref={emblaRef}>
-        <div className="flex gap-4 touch-pan-x pb-4">
-          {filtered.map((loc) => (
-            <button
-              key={loc.id}
-              onClick={() => navigate(`/location/${loc.id}`)}
-              className="flex-shrink-0 w-64 group relative rounded-2xl overflow-hidden aspect-[4/3] shadow-md border border-border"
-              aria-label={`View ${loc.name}`}
-            >
-              <img
-                src={loc.image_url || ""}
-                alt={loc.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
-                <h3 className="text-lg font-bold text-white mb-1 leading-tight">{loc.name}</h3>
-                <div className="flex items-center gap-3 text-white/80 text-[10px] font-medium">
-                  {loc.region && <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />{loc.region}</span>}
-                  {loc.rating && <span className="flex items-center gap-0.5 text-accent"><Star className="w-3 h-3 fill-accent" />{loc.rating}</span>}
-                  {loc.visit_count != null && <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" />{loc.visit_count}</span>}
-                </div>
-              </div>
-            </button>
-          ))}
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="w-16 h-16 rounded-2xl gradient-sunset flex items-center justify-center mb-4 opacity-60">
+            <MapPin className="w-8 h-8 text-primary-foreground" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">No destinations found</p>
+          <p className="text-xs text-muted-foreground mt-1">Try a different category or check back soon!</p>
         </div>
-      </div>
+      ) : (
+        /* Swipable Carousel */
+        <div className="overflow-hidden -mx-4 px-4" ref={emblaRef}>
+          <div className="flex gap-4 touch-pan-x pb-4">
+            {filtered.map((loc) => (
+              <button
+                key={loc.id}
+                onClick={() => navigate(`/location/${loc.id}`)}
+                className="flex-shrink-0 w-64 group relative rounded-2xl overflow-hidden aspect-[4/3] shadow-md border border-border"
+                aria-label={`View ${loc.name}`}
+              >
+                <img
+                  src={loc.image_url || ""}
+                  alt={loc.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
+                  <h3 className="text-lg font-bold text-white mb-1 leading-tight">{loc.name}</h3>
+                  <div className="flex items-center gap-3 text-white/80 text-[10px] font-medium">
+                    {loc.region && <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />{loc.region}</span>}
+                    {loc.rating && <span className="flex items-center gap-0.5 text-accent"><Star className="w-3 h-3 fill-accent" />{loc.rating}</span>}
+                    {loc.visit_count != null && <span className="flex items-center gap-0.5"><Eye className="w-3 h-3" />{loc.visit_count}</span>}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

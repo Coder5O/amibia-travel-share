@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, ArrowLeft, Plus } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface Conversation {
   id: string;
@@ -19,8 +20,48 @@ interface Message {
   created_at: string;
 }
 
+type QuickMessageGroup = {
+  title: string;
+  chipClass: string;
+  messages: string[];
+};
+
+const quickMessageGroups: QuickMessageGroup[] = [
+  {
+    title: "Availability ⏰",
+    chipClass: "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-400/30",
+    messages: ["⏰ Free now?", "👀 Available?", "📅 Today?", "🌙 Tonight?", "🤔 Busy?"],
+  },
+  {
+    title: "Invite 🤝",
+    chipClass: "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-400/30",
+    messages: ["➕ Join me", "🤝 Link up", "😎 Hang out?", "🚶 Come along", "🎉 Let’s go"],
+  },
+  {
+    title: "Activity 🍔",
+    chipClass: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-400/30",
+    messages: ["🍔 Grab food", "☕ Coffee?", "🎬 Movie?", "🚗 Drive?", "📚 Study?"],
+  },
+  {
+    title: "Explore 🌍",
+    chipClass: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-400/30",
+    messages: ["🌍 Go out", "✨ Explore", "🏞️ Adventure?", "🚶‍♂️ Walk?", "🌅 Catch a vibe"],
+  },
+  {
+    title: "Plan 📍",
+    chipClass: "bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-400/30",
+    messages: ["📍 Pick a place", "🕒 Set time", "❓ Where to?", "🗓️ When free?", "⚡ Quick plan"],
+  },
+  {
+    title: "Confirm ✅",
+    chipClass: "bg-green-500/15 text-green-700 dark:text-green-300 border-green-400/30",
+    messages: ["✅ I’m in", "👍 Sounds good", "🚀 Let’s go", "🏃 On my way", "❌ Can’t make it"],
+  },
+];
+
 export default function ChatPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -30,6 +71,9 @@ export default function ChatPage() {
   const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
   const [loadingProfiles, setLoadingProfiles] = useState(false);
+  const [loadingConversations, setLoadingConversations] = useState(false);
+  const [creatingConversationFor, setCreatingConversationFor] = useState<string | null>(null);
+  const [sendingMessage, setSendingMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const statusColors: Record<string, string> = {
@@ -73,24 +117,47 @@ export default function ChatPage() {
 
   const loadConversations = async () => {
     if (!user) return;
-    const { data: participants } = await supabase
+    setLoadingConversations(true);
+    const { data: participants, error: participantsError } = await supabase
       .from("conversation_participants")
       .select("conversation_id")
       .eq("user_id", user.id);
 
-    if (!participants?.length) return;
+    if (participantsError) {
+      toast({ title: "Could not load conversations", description: participantsError.message, variant: "destructive" });
+      setLoadingConversations(false);
+      return;
+    }
+
+    if (!participants?.length) {
+      setConversations([]);
+      setLoadingConversations(false);
+      return;
+    }
 
     const convoIds = participants.map((p) => p.conversation_id);
-    const { data: otherParticipants } = await supabase
+    const { data: otherParticipants, error: othersError } = await supabase
       .from("conversation_participants")
       .select("conversation_id, user_id")
       .in("conversation_id", convoIds)
       .neq("user_id", user.id);
 
+    if (othersError) {
+      toast({ title: "Could not load conversation participants", description: othersError.message, variant: "destructive" });
+      setLoadingConversations(false);
+      return;
+    }
+
     const otherUserIds = otherParticipants?.map((p) => p.user_id) || [];
-    const { data: profiles } = otherUserIds.length
+    const { data: profiles, error: profilesError } = otherUserIds.length
       ? await supabase.from("profiles").select("user_id, display_name, avatar_url, category").in("user_id", otherUserIds)
-      : { data: [] };
+      : { data: [], error: null };
+
+    if (profilesError) {
+      toast({ title: "Could not load user profiles", description: profilesError.message, variant: "destructive" });
+      setLoadingConversations(false);
+      return;
+    }
 
     const profileMap = new Map((profiles || []).map((p) => [p.user_id, p] as const));
     const participantMap = new Map((otherParticipants || []).map((p) => [p.conversation_id, p.user_id] as const));
@@ -102,38 +169,59 @@ export default function ChatPage() {
         other_user: profileMap.get(participantMap.get(id) || "") as any,
       }))
     );
+    setLoadingConversations(false);
   };
 
   const loadMessages = async (convoId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("messages")
       .select("*")
       .eq("conversation_id", convoId)
       .order("created_at", { ascending: true });
+    if (error) {
+      toast({ title: "Could not load messages", description: error.message, variant: "destructive" });
+      return;
+    }
     if (data) setMessages(data);
   };
 
   const loadAllProfiles = async () => {
     if (!user) return;
     setLoadingProfiles(true);
-    const { data } = await supabase.from("profiles").select("*").neq("user_id", user.id);
+    const { data, error } = await supabase.from("profiles").select("*").neq("user_id", user.id);
+    if (error) {
+      toast({ title: "Could not load profiles", description: error.message, variant: "destructive" });
+      setLoadingProfiles(false);
+      return;
+    }
     if (data) setAllProfiles(data);
     setLoadingProfiles(false);
   };
 
   const startConversation = async (otherUserId: string) => {
     if (!user) return;
+    setCreatingConversationFor(otherUserId);
     
     // Check if conversation already exists
-    const { data: myConvos } = await supabase
+    const { data: myConvos, error: myConvosError } = await supabase
       .from("conversation_participants")
       .select("conversation_id")
       .eq("user_id", user.id);
+    if (myConvosError) {
+      toast({ title: "Could not start chat", description: myConvosError.message, variant: "destructive" });
+      setCreatingConversationFor(null);
+      return;
+    }
 
-    const { data: theirConvos } = await supabase
+    const { data: theirConvos, error: theirConvosError } = await supabase
       .from("conversation_participants")
       .select("conversation_id")
       .eq("user_id", otherUserId);
+    if (theirConvosError) {
+      toast({ title: "Could not start chat", description: theirConvosError.message, variant: "destructive" });
+      setCreatingConversationFor(null);
+      return;
+    }
 
     const myIds = new Set(myConvos?.map(c => c.conversation_id) || []);
     const commonConvo = theirConvos?.find(c => myIds.has(c.conversation_id));
@@ -141,31 +229,93 @@ export default function ChatPage() {
     if (commonConvo) {
       setShowNewChat(false);
       setActiveConvo(commonConvo.conversation_id);
+      setCreatingConversationFor(null);
       return;
     }
 
     // Create conversation
-    const { data: convo } = await supabase.from("conversations").insert({}).select().single();
-    if (!convo) return;
+    const { data: convo, error: createConvoError } = await supabase.from("conversations").insert({}).select().single();
+    if (createConvoError || !convo) {
+      toast({
+        title: "Could not create conversation",
+        description: createConvoError?.message || "Conversation creation was blocked.",
+        variant: "destructive",
+      });
+      setCreatingConversationFor(null);
+      return;
+    }
     
-    await supabase.from("conversation_participants").insert([
-      { conversation_id: convo.id, user_id: user.id },
-      { conversation_id: convo.id, user_id: otherUserId },
-    ]);
+    // Insert self first so RLS checks for adding other participants can pass reliably.
+    const { error: addSelfError } = await supabase
+      .from("conversation_participants")
+      .insert({ conversation_id: convo.id, user_id: user.id });
+    if (addSelfError) {
+      toast({ title: "Could not initialize conversation", description: addSelfError.message, variant: "destructive" });
+      setCreatingConversationFor(null);
+      return;
+    }
+
+    const { error: addOtherError } = await supabase
+      .from("conversation_participants")
+      .insert({ conversation_id: convo.id, user_id: otherUserId });
+    if (addOtherError) {
+      toast({ title: "Could not add participant", description: addOtherError.message, variant: "destructive" });
+      setCreatingConversationFor(null);
+      return;
+    }
 
     setShowNewChat(false);
     setActiveConvo(convo.id);
     loadConversations();
+    setCreatingConversationFor(null);
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !activeConvo || !user) return;
-    await supabase.from("messages").insert({
+    if (!newMessage.trim() || !activeConvo || !user || sendingMessage) return;
+    setSendingMessage(true);
+    const content = newMessage.trim();
+    const { data, error } = await supabase.from("messages").insert({
       conversation_id: activeConvo,
       sender_id: user.id,
-      content: newMessage.trim(),
-    });
+      content,
+    }).select("*").single();
+
+    if (error) {
+      toast({ title: "Message failed to send", description: error.message, variant: "destructive" });
+      setSendingMessage(false);
+      return;
+    }
+
+    if (data) {
+      setMessages((prev) => [...prev, data as Message]);
+    }
     setNewMessage("");
+    setSendingMessage(false);
+  };
+
+  const sendQuickMessage = async (content: string) => {
+    if (!content || !activeConvo || !user || sendingMessage) return;
+    setSendingMessage(true);
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        conversation_id: activeConvo,
+        sender_id: user.id,
+        content,
+      })
+      .select("*")
+      .single();
+
+    if (error) {
+      toast({ title: "Message failed to send", description: error.message, variant: "destructive" });
+      setSendingMessage(false);
+      return;
+    }
+
+    if (data) {
+      setMessages((prev) => [...prev, data as Message]);
+    }
+    setSendingMessage(false);
   };
 
   const activeConvoData = conversations.find((c) => c.id === activeConvo);
@@ -197,6 +347,7 @@ export default function ChatPage() {
                 <button
                   key={profile.user_id}
                   onClick={() => startConversation(profile.user_id)}
+                  disabled={creatingConversationFor === profile.user_id}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
                 >
                   <div className="w-10 h-10 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm relative">
@@ -213,7 +364,11 @@ export default function ChatPage() {
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto pb-24">
-              {conversations.length === 0 ? (
+              {loadingConversations ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : conversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center p-8">
                   <p className="text-muted-foreground">No conversations yet</p>
                   <p className="text-sm text-muted-foreground mt-1">Tap + to start chatting with fellow travelers</p>
@@ -268,17 +423,39 @@ export default function ChatPage() {
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t border-border flex gap-2">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              className="flex-1"
-            />
-            <Button onClick={sendMessage} size="icon" className="gradient-sunset text-primary-foreground">
-              <Send className="w-4 h-4" />
-            </Button>
+          <div className="p-4 border-t border-border space-y-3 bg-background/95 backdrop-blur-sm">
+            <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+              {quickMessageGroups.map((group) => (
+                <div key={group.title} className="space-y-1">
+                  <p className="text-[11px] font-semibold text-muted-foreground">{group.title}</p>
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                    {group.messages.map((message) => (
+                      <button
+                        key={message}
+                        onClick={() => sendQuickMessage(message)}
+                        disabled={sendingMessage}
+                        className={`shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-85 disabled:opacity-60 ${group.chipClass}`}
+                      >
+                        {message}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-2">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type a message..."
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                className="flex-1"
+              />
+              <Button onClick={sendMessage} size="icon" className="gradient-sunset text-primary-foreground" disabled={sendingMessage || !newMessage.trim()}>
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
       )}

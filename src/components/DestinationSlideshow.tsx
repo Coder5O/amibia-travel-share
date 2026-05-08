@@ -15,6 +15,59 @@ interface Location {
   region: string | null;
 }
 
+const fallbackLocations: Location[] = [
+  {
+    id: "fallback-swakopmund",
+    name: "Swakopmund",
+    description: "Coastal city with adventure activities and ocean views.",
+    image_url: null,
+    category: "nature",
+    rating: 4.8,
+    visit_count: 148,
+    region: "Erongo",
+  },
+  {
+    id: "fallback-etosha",
+    name: "Etosha National Park",
+    description: "Wildlife safari hotspot with unforgettable sunsets.",
+    image_url: null,
+    category: "nature",
+    rating: 4.9,
+    visit_count: 212,
+    region: "Oshikoto",
+  },
+  {
+    id: "fallback-joe-pub",
+    name: "Joe's Beerhouse",
+    description: "A local favorite for food and social vibes.",
+    image_url: null,
+    category: "restaurant",
+    rating: 4.6,
+    visit_count: 119,
+    region: "Khomas",
+  },
+  {
+    id: "fallback-sossusvlei",
+    name: "Sossusvlei",
+    description: "Iconic red dunes and desert landscapes.",
+    image_url: null,
+    category: "nature",
+    rating: 4.9,
+    visit_count: 175,
+    region: "Hardap",
+  },
+  {
+    id: "fallback-nightlife",
+    name: "Windhoek Nightlife",
+    description: "Lively spots for music and meeting new people.",
+    image_url: null,
+    category: "nightlife",
+    rating: 4.4,
+    visit_count: 93,
+    region: "Khomas",
+  },
+];
+
 const filterTabs = [
   { key: "all", label: "🌍 All" },
   { key: "most_visited", label: "🔥 Most Visited" },
@@ -32,8 +85,12 @@ export default function DestinationSlideshow() {
   const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, align: "start" });
 
   useEffect(() => {
-    supabase.from("locations").select("*").then(({ data }) => {
-      if (data) setLocations(data);
+    supabase.from("locations").select("*").then(({ data, error }) => {
+      if (error || !data || data.length === 0) {
+        setLocations(fallbackLocations);
+        return;
+      }
+      setLocations(data as Location[]);
     });
   }, []);
 
@@ -98,12 +155,16 @@ export default function DestinationSlideshow() {
                 className="flex-shrink-0 w-64 group relative rounded-2xl overflow-hidden aspect-[4/3] shadow-md border border-border"
                 aria-label={`View ${loc.name}`}
               >
-                <img
-                  src={loc.image_url || ""}
-                  alt={loc.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
+                {loc.image_url ? (
+                  <img
+                    src={loc.image_url}
+                    alt={loc.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary/70 via-accent/60 to-primary/30" />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-left">

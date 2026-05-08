@@ -46,7 +46,7 @@ export default function SOSButton() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Emergency SOS"
-        className="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-destructive text-destructive-foreground shadow-2xl flex items-center justify-center hover:scale-105 transition-transform animate-pulse-slow"
+        className="fixed bottom-24 left-4 z-40 w-14 h-14 rounded-full bg-destructive text-destructive-foreground shadow-2xl flex items-center justify-center hover:scale-105 transition-transform animate-pulse-slow"
       >
         <AlertTriangle className="w-6 h-6" />
       </button>

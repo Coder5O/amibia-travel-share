@@ -78,11 +78,28 @@ const filterTabs = [
   { key: "cultural", label: "🏛️ Cultural" },
 ];
 
+const locationImageFallbacks: Record<string, string> = {
+  swakopmund: "https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=1200&q=80",
+  "etosha national park": "https://images.unsplash.com/photo-1549366021-9f761d450615?auto=format&fit=crop&w=1200&q=80",
+  sossusvlei: "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1200&q=80",
+  "joe's beerhouse": "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80",
+  "windhoek nightlife": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
+  windhoek: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=80",
+};
+
+const categoryImageFallbacks: Record<string, string> = {
+  nature: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1200&q=80",
+  restaurant: "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80",
+  nightlife: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80",
+  cultural: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=1200&q=80",
+};
+
 export default function DestinationSlideshow() {
   const navigate = useNavigate();
   const [locations, setLocations] = useState<Location[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, align: "start" });
+  const [isPaused, setIsPaused] = useState(false);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, align: "start", loop: true });
 
   useEffect(() => {
     supabase.from("locations").select("*").then(({ data, error }) => {
@@ -117,6 +134,25 @@ export default function DestinationSlideshow() {
     if (emblaApi) emblaApi.scrollTo(0);
   }, [activeFilter, emblaApi]);
 
+  useEffect(() => {
+    if (!emblaApi || filtered.length <= 1 || isPaused) return;
+    const interval = window.setInterval(() => {
+      emblaApi.scrollNext();
+    }, 5000);
+    return () => window.clearInterval(interval);
+  }, [emblaApi, filtered.length, isPaused]);
+
+  const getLocationImage = (loc: Location) => {
+    if (loc.image_url) return loc.image_url;
+    const nameKey = loc.name.toLowerCase().trim();
+    if (locationImageFallbacks[nameKey]) return locationImageFallbacks[nameKey];
+
+    const categoryKey = (loc.category || "").toLowerCase().trim();
+    if (categoryImageFallbacks[categoryKey]) return categoryImageFallbacks[categoryKey];
+
+    return "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80";
+  };
+
   return (
     <div className="space-y-4">
       {/* Category tabs */}
@@ -146,7 +182,15 @@ export default function DestinationSlideshow() {
         </div>
       ) : (
         /* Swipable Carousel */
-        <div className="overflow-hidden -mx-4 px-4" ref={emblaRef}>
+        <div
+          className="overflow-hidden -mx-4 px-4"
+          ref={emblaRef}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+          onTouchCancel={() => setIsPaused(false)}
+        >
           <div className="flex gap-4 touch-pan-x pb-4">
             {filtered.map((loc) => (
               <button
@@ -155,16 +199,12 @@ export default function DestinationSlideshow() {
                 className="flex-shrink-0 w-64 group relative rounded-2xl overflow-hidden aspect-[4/3] shadow-md border border-border"
                 aria-label={`View ${loc.name}`}
               >
-                {loc.image_url ? (
-                  <img
-                    src={loc.image_url}
-                    alt={loc.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/70 via-accent/60 to-primary/30" />
-                )}
+                <img
+                  src={getLocationImage(loc)}
+                  alt={loc.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-left">

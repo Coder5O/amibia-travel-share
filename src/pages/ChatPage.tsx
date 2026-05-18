@@ -32,32 +32,32 @@ const quickMessageGroups: QuickMessageGroup[] = [
   {
     title: "Availability ⏰",
     chipClass: "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-400/30",
-    messages: ["⏰ Free now?", "👀 Available?", "📅 Today?", "🌙 Tonight?", "🤔 Busy?"],
+    messages: ["Are you free?", "Available today?", "Free this evening?"],
   },
   {
-    title: "Invite 🤝",
+    title: "Quick invites 🤝",
     chipClass: "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-400/30",
-    messages: ["➕ Join me", "🤝 Link up", "😎 Hang out?", "🚶 Come along", "🎉 Let’s go"],
+    messages: ["Wanna hang out?", "Let’s go out?", "Join me?", "Let’s chill?"],
   },
   {
-    title: "Activity 🍔",
+    title: "Activity-based 🍔",
     chipClass: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-400/30",
-    messages: ["🍔 Grab food", "☕ Coffee?", "🎬 Movie?", "🚗 Drive?", "📚 Study?"],
+    messages: ["Grab food?", "Coffee?", "Movie?", "Drive around?"],
   },
   {
-    title: "Explore 🌍",
+    title: "Outing vibe 🌍",
     chipClass: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-400/30",
-    messages: ["🌍 Go out", "✨ Explore", "🏞️ Adventure?", "🚶‍♂️ Walk?", "🌅 Catch a vibe"],
+    messages: ["Let’s go somewhere?", "Weekend getaway?", "Outing today?", "Mini adventure?"],
   },
   {
-    title: "Plan 📍",
+    title: "Follow-ups 📍",
     chipClass: "bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-400/30",
-    messages: ["📍 Pick a place", "🕒 Set time", "❓ Where to?", "🗓️ When free?", "⚡ Quick plan"],
+    messages: ["When are you free?", "What time works?", "Where should we go?", "Pick a place."],
   },
   {
-    title: "Confirm ✅",
+    title: "Confirmations ✅",
     chipClass: "bg-green-500/15 text-green-700 dark:text-green-300 border-green-400/30",
-    messages: ["✅ I’m in", "👍 Sounds good", "🚀 Let’s go", "🏃 On my way", "❌ Can’t make it"],
+    messages: ["I’m in", "Sounds good", "Let’s do it", "On my way", "I'm available", "I'm ready"],
   },
 ];
 

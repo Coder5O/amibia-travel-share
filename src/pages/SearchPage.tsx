@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import LeaveReviewDialog from "@/components/LeaveReviewDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { getInitials } from "@/lib/utils";
 
 const categoryBadge: Record<string, { label: string; emoji: string }> = {
   has_means: { label: "Has Means", emoji: "🚗" },
@@ -220,7 +221,7 @@ export default function SearchPage() {
                     <img src={profile.avatar_url} alt={profile.display_name} className="w-14 h-14 rounded-full object-cover" />
                   ) : (
                     <div className="w-14 h-14 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground text-xl font-bold">
-                      {profile.display_name?.[0]?.toUpperCase() || "?"}
+                      {getInitials(profile.display_name)}
                     </div>
                   )}
                   {profile.verified && (

@@ -6,11 +6,14 @@ import BuddySlideshow from "@/components/BuddySlideshow";
 import PostFeed from "@/components/PostFeed";
 import CreatePostDialog from "@/components/CreatePostDialog";
 import TopRatedTravelers from "@/components/TopRatedTravelers";
+import { ActivityFeed } from "@/components/ActivityFeed";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import UserProfileDialog from "@/components/UserProfileDialog";
+import { useToast } from "@/hooks/use-toast";
+import { getInitials } from "@/lib/utils";
 
 const statusColors: Record<string, string> = {
   available: "bg-green-500",
@@ -26,6 +29,42 @@ export default function Index() {
   const [feedKey, setFeedKey] = useState(0);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [emblaRef] = useEmblaCarousel({ dragFree: true, align: "start" });
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const checkNewTrips = async () => {
+      if (!user) return;
+      
+      const { data: profile } = await supabase.from("profiles").select("desired_destinations").eq("user_id", user.id).single();
+      const desired = profile?.desired_destinations || [];
+
+      const { data: saved } = await supabase.from("saved_places").select("locations(name)").eq("user_id", user.id);
+      const savedNames = saved?.map((s: any) => s.locations?.name).filter(Boolean) || [];
+
+      const allTargets = [...new Set([...desired, ...savedNames])];
+      if (allTargets.length === 0) return;
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const { data: recentTrips } = await supabase
+        .from("trips")
+        .select("destination, id")
+        .neq("user_id", user.id)
+        .gte("created_at", yesterday.toISOString());
+
+      if (recentTrips && recentTrips.length > 0) {
+        const matches = recentTrips.filter(t => allTargets.some(target => t.destination.toLowerCase().includes(target.toLowerCase())));
+        if (matches.length > 0) {
+          toast({
+            title: "New trip match! 🚗",
+            description: `Someone posted a trip to ${matches[0].destination}.`,
+          });
+        }
+      }
+    };
+    checkNewTrips();
+  }, [user, toast]);
 
   useEffect(() => {
     supabase.from("profiles")
@@ -96,7 +135,7 @@ export default function Index() {
                       <img src={b.avatar_url} alt={b.display_name} className="w-full h-full rounded-[12px] object-cover" />
                     ) : (
                       <div className="w-full h-full rounded-[12px] gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-xl">
-                        {b.display_name?.[0]?.toUpperCase() || "?"}
+                        {getInitials(b.display_name)}
                       </div>
                     )}
                   </div>
@@ -111,6 +150,9 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* Activity Feed */}
+      <ActivityFeed />
 
       {/* Featured Destination */}
       <section className="mb-8">

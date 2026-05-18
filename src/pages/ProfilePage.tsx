@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Camera, MapPin, Edit2, Save, Phone, AlertTriangle, Star, Bookmark, Map, ShieldCheck, X, Car, Users, Crown, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatePostDialog from "@/components/CreatePostDialog";
+import { getInitials } from "@/lib/utils";
 
 const categoryBadge: Record<string, { label: string; emoji: string }> = {
   has_means: { label: "Has the Means", emoji: "🚗" },
@@ -61,7 +62,7 @@ export default function ProfilePage() {
     display_name: "", bio: "", fun_fact: "", location: "", travel_style: "",
     category: "has_both", languages: [] as string[], interests: [] as string[], phone: "",
     availability_status: "available", available_from: "", available_to: "", trip_type: "",
-    desired_destinations: [] as string[],
+    desired_destinations: [] as string[], travel_vibe: "",
   });
   const [destinationInput, setDestinationInput] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -96,6 +97,7 @@ export default function ProfilePage() {
         available_to: (data as any).available_to || "",
         trip_type: (data as any).trip_type || "",
         desired_destinations: (data as any).desired_destinations || [],
+        travel_vibe: (data as any).travel_vibe || "",
       });
     }
   };
@@ -137,6 +139,7 @@ export default function ProfilePage() {
       fun_fact: form.fun_fact,
       location: form.location,
       travel_style: form.travel_style,
+      travel_vibe: form.travel_vibe,
       category: form.category as any,
       languages: form.languages,
       interests: form.interests,
@@ -242,7 +245,7 @@ export default function ProfilePage() {
           <img src={profile.avatar_url} alt={profile.display_name} className="w-20 h-20 rounded-full border-4 border-background object-cover" />
         ) : (
           <div className="w-20 h-20 rounded-full border-4 border-background gradient-sunset flex items-center justify-center text-primary-foreground text-2xl font-bold">
-            {profile.display_name?.[0]?.toUpperCase() || "?"}
+            {getInitials(profile.display_name)}
           </div>
         )}
       </div>
@@ -348,6 +351,22 @@ export default function ProfilePage() {
 
             <div><Label>Bio</Label><Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2} /></div>
             <div><Label>Travel Style</Label><Input value={form.travel_style} onChange={(e) => setForm({ ...form, travel_style: e.target.value })} placeholder="Adventurous, relaxed..." /></div>
+            
+            <div>
+              <Label>Travel Vibe</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1">
+                {[
+                  { value: "chatty", label: "I'm chatty 💬" },
+                  { value: "quiet", label: "I prefer quiet 🤫" },
+                  { value: "depends", label: "Depends on the vibe 🎲" }
+                ].map((vibe) => (
+                  <button key={vibe.value} type="button" onClick={() => setForm({ ...form, travel_vibe: vibe.value })}
+                    className={`py-2 px-3 rounded-lg text-xs font-medium transition-all text-center ${form.travel_vibe === vibe.value ? "border-2 border-primary bg-primary/10 text-primary" : "border-2 border-border text-foreground hover:border-primary/40"}`}>
+                    {vibe.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Availability */}
             <div className="rounded-xl border border-border p-3 space-y-3">
@@ -421,6 +440,12 @@ export default function ProfilePage() {
             )}
             {(profile as any).interests && (profile as any).interests.length > 0 && (
               <div className="flex flex-wrap gap-1">{(profile as any).interests.map((i: string) => <Badge key={i} variant="secondary" className="text-xs">{i}</Badge>)}</div>
+            )}
+            
+            {(profile as any).travel_vibe && (
+              <div className="mt-2 inline-block px-3 py-1.5 rounded-full bg-muted border border-border text-xs font-medium text-foreground">
+                {(profile as any).travel_vibe === "chatty" ? "I'm chatty 💬" : (profile as any).travel_vibe === "quiet" ? "I prefer quiet 🤫" : "Depends on the vibe 🎲"}
+              </div>
             )}
 
             {/* Availability summary */}

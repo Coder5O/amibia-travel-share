@@ -5,6 +5,7 @@ import { MapPin, Calendar, ChevronLeft, ChevronRight, MessageCircle, ShieldCheck
 import useEmblaCarousel from "embla-carousel-react";
 import { useAuth } from "@/contexts/AuthContext";
 import UserProfileDialog from "@/components/UserProfileDialog";
+import { getInitials } from "@/lib/utils";
 interface Profile {
   id: string;
   user_id: string;
@@ -108,7 +109,7 @@ export default function BuddySlideshow() {
                       <img src={current.avatar_url} alt={current.display_name} className="w-20 h-20 rounded-2xl object-cover border-2 border-primary shadow-sm" />
                     ) : (
                       <div className="w-20 h-20 rounded-2xl gradient-sunset flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-sm">
-                        {current.display_name?.[0]?.toUpperCase() || "?"}
+                        {getInitials(current.display_name)}
                       </div>
                     )}
                     <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-card ${statusDot}`} />

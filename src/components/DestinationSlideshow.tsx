@@ -79,12 +79,16 @@ const filterTabs = [
 ];
 
 const locationImageFallbacks: Record<string, string> = {
-  swakopmund: "https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=1200&q=80",
-  "etosha national park": "https://images.unsplash.com/photo-1549366021-9f761d450615?auto=format&fit=crop&w=1200&q=80",
-  sossusvlei: "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1200&q=80",
-  "joe's beerhouse": "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80",
-  "windhoek nightlife": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
-  windhoek: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=80",
+  sossusvlei: "https://commons.wikimedia.org/wiki/Special:FilePath/Dune_45%2C_Sossusvlei_%282017%29.jpg",
+  "etosha national park": "https://commons.wikimedia.org/wiki/Special:FilePath/Etosha_National_Park%2C_Namibia_%282856072100%29.jpg",
+  swakopmund: "https://commons.wikimedia.org/wiki/Special:FilePath/Jetty%2C_Swakopmund%2C_Namibia%2C_2018-08-04%2C_DD_68-70_HDR.jpg",
+  "joe's beerhouse": "https://commons.wikimedia.org/wiki/Special:FilePath/Joes-Beerhouse_Windhoek-Namibia1.jpg",
+  "windhoek nightlife": "https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg",
+  "brewers market": "https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg",
+  "chopsi's bar": "https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg",
+  "the social club": "https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg",
+  "andy's pub": "https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg",
+  windhoek: "https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg",
 };
 
 const categoryImageFallbacks: Record<string, string> = {
@@ -99,6 +103,7 @@ export default function DestinationSlideshow() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [isPaused, setIsPaused] = useState(false);
+  const [imageErrorByLocation, setImageErrorByLocation] = useState<Record<string, boolean>>({});
   const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, align: "start", loop: true });
 
   useEffect(() => {
@@ -142,15 +147,17 @@ export default function DestinationSlideshow() {
     return () => window.clearInterval(interval);
   }, [emblaApi, filtered.length, isPaused]);
 
-  const getLocationImage = (loc: Location) => {
-    if (loc.image_url) return loc.image_url;
-    const nameKey = loc.name.toLowerCase().trim();
-    if (locationImageFallbacks[nameKey]) return locationImageFallbacks[nameKey];
-
+  const getCategoryFallback = (loc: Location) => {
     const categoryKey = (loc.category || "").toLowerCase().trim();
     if (categoryImageFallbacks[categoryKey]) return categoryImageFallbacks[categoryKey];
-
     return "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80";
+  };
+
+  const getLocationImage = (loc: Location) => {
+    if (loc.image_url && !imageErrorByLocation[loc.id]) return loc.image_url;
+    const nameKey = loc.name.toLowerCase().trim();
+    if (locationImageFallbacks[nameKey]) return locationImageFallbacks[nameKey];
+    return getCategoryFallback(loc);
   };
 
   return (
@@ -204,6 +211,9 @@ export default function DestinationSlideshow() {
                   alt={loc.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
+                  onError={() => {
+                    setImageErrorByLocation((prev) => (prev[loc.id] ? prev : { ...prev, [loc.id]: true }));
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 

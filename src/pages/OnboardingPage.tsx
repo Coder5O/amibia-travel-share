@@ -16,6 +16,9 @@ const categories = [
   { value: "has_both" as Category, label: "Has Both", desc: "I'm flexible — car, budget & good vibes", icon: Crown },
 ];
 
+const availableInterests = ["Hiking", "Photography", "Nightlife", "Wildlife", "Culture", "Food", "Surfing", "Camping", "Road Trips", "History"];
+const availableLanguages = ["English", "Afrikaans", "Oshiwambo", "German", "Otjiherero", "Portuguese", "French"];
+
 interface OnboardingProps {
   onComplete: () => void;
 }
@@ -28,9 +31,15 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [category, setCategory] = useState<Category | "">("");
   const [funFact, setFunFact] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [travelVibe, setTravelVibe] = useState("");
   const [idFile, setIdFile] = useState<File | null>(null);
   const [idPreview, setIdPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const toggleInterest = (i: string) => setInterests(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
+  const toggleLanguage = (l: string) => setLanguages(prev => prev.includes(l) ? prev.filter(x => x !== l) : [...prev, l]);
 
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,6 +73,10 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
         category,
         fun_fact: funFact,
         avatar_url: avatarUrl,
+        interests,
+        languages,
+        travel_vibe: travelVibe,
+        ...(idFile ? { verified: true } : {})
       }).eq("user_id", user.id);
 
       toast({ title: "You're all set! 🎉" });
@@ -79,7 +92,7 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Progress bar */}
       <div className="flex gap-2 p-4 pt-6">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div key={s} className={`flex-1 h-1 rounded-full transition-all ${s <= step ? "gradient-sunset" : "bg-muted"}`} />
         ))}
       </div>
@@ -153,6 +166,69 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
 
         {step === 3 && (
           <div className="flex-1 flex flex-col animate-slide-in">
+            <h2 className="text-2xl font-bold text-foreground mt-4">Interests & Languages</h2>
+            <p className="text-muted-foreground text-sm mt-1 mb-6">Select what you love and what you speak</p>
+
+            <div className="space-y-6">
+              <div>
+                <Label className="text-base mb-3 block">Travel Vibe</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { value: "chatty", label: "I'm chatty 💬" },
+                    { value: "quiet", label: "I prefer quiet 🤫" },
+                    { value: "depends", label: "Depends on the vibe 🎲" }
+                  ].map((vibe) => (
+                    <button key={vibe.value} type="button" onClick={() => setTravelVibe(vibe.value)}
+                      className={`p-3 rounded-xl border-2 transition-all text-center ${travelVibe === vibe.value ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/40 text-foreground"}`}>
+                      <span className="font-medium text-sm">{vibe.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-base mb-3 block">Interests</Label>
+                <div className="flex flex-wrap gap-2">
+                  {availableInterests.map(interest => (
+                    <button
+                      key={interest}
+                      onClick={() => toggleInterest(interest)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                        interests.includes(interest)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted text-muted-foreground border-transparent hover:bg-muted/80"
+                      }`}
+                    >
+                      {interest}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-base mb-3 block">Languages</Label>
+                <div className="flex flex-wrap gap-2">
+                  {availableLanguages.map(language => (
+                    <button
+                      key={language}
+                      onClick={() => toggleLanguage(language)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                        languages.includes(language)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted text-muted-foreground border-transparent hover:bg-muted/80"
+                      }`}
+                    >
+                      {language}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="flex-1 flex flex-col animate-slide-in">
             <h2 className="text-2xl font-bold text-foreground mt-4">Verify your identity</h2>
             <p className="text-muted-foreground text-sm mt-1 mb-8">Upload a photo of your ID for safety (optional)</p>
 
@@ -185,7 +261,7 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
               <ArrowLeft className="w-4 h-4 mr-2" /> Back
             </Button>
           )}
-          {step < 3 ? (
+          {step < 4 ? (
             <Button
               onClick={() => setStep(step + 1)}
               className="flex-1 gradient-sunset text-primary-foreground"
@@ -204,7 +280,7 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
           )}
         </div>
 
-        {step === 3 && (
+        {step === 4 && (
           <button onClick={handleComplete} className="text-sm text-muted-foreground text-center mt-3 hover:underline">
             Skip for now
           </button>

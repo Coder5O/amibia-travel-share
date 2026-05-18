@@ -39,7 +39,7 @@ function AppRoutes() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="px-4 pt-4">
+      <main className="px-4 pt-4 animate-fade-in overscroll-y-auto">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/search" element={<SearchPage />} />

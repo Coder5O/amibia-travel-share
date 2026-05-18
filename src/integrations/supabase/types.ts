@@ -264,6 +264,7 @@ export type Database = {
           location: string | null
           phone: string | null
           travel_style: string | null
+          travel_vibe: string | null
           trip_type: string | null
           updated_at: string
           user_id: string
@@ -288,6 +289,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           travel_style?: string | null
+          travel_vibe?: string | null
           trip_type?: string | null
           updated_at?: string
           user_id: string
@@ -312,6 +314,7 @@ export type Database = {
           location?: string | null
           phone?: string | null
           travel_style?: string | null
+          travel_vibe?: string | null
           trip_type?: string | null
           updated_at?: string
           user_id?: string

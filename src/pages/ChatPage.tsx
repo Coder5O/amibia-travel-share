@@ -3,9 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft, Plus } from "lucide-react";
+import { Send, ArrowLeft, Plus, MessageCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { getConversationErrorMessage, startOrGetConversation } from "@/lib/chatConversations";
+import { getInitials } from "@/lib/utils";
 
 interface Conversation {
   id: string;
@@ -201,71 +203,19 @@ export default function ChatPage() {
   const startConversation = async (otherUserId: string) => {
     if (!user) return;
     setCreatingConversationFor(otherUserId);
-    
-    // Check if conversation already exists
-    const { data: myConvos, error: myConvosError } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", user.id);
-    if (myConvosError) {
-      toast({ title: "Could not start chat", description: myConvosError.message, variant: "destructive" });
-      setCreatingConversationFor(null);
-      return;
-    }
-
-    const { data: theirConvos, error: theirConvosError } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", otherUserId);
-    if (theirConvosError) {
-      toast({ title: "Could not start chat", description: theirConvosError.message, variant: "destructive" });
-      setCreatingConversationFor(null);
-      return;
-    }
-
-    const myIds = new Set(myConvos?.map(c => c.conversation_id) || []);
-    const commonConvo = theirConvos?.find(c => myIds.has(c.conversation_id));
-
-    if (commonConvo) {
-      setShowNewChat(false);
-      setActiveConvo(commonConvo.conversation_id);
-      setCreatingConversationFor(null);
-      return;
-    }
-
-    // Create conversation
-    const { data: convo, error: createConvoError } = await supabase.from("conversations").insert({}).select().single();
-    if (createConvoError || !convo) {
+    const { conversationId, error } = await startOrGetConversation(user.id, otherUserId);
+    if (error || !conversationId) {
       toast({
         title: "Could not create conversation",
-        description: createConvoError?.message || "Conversation creation was blocked.",
+        description: getConversationErrorMessage((error as any)?.message),
         variant: "destructive",
       });
       setCreatingConversationFor(null);
       return;
     }
-    
-    // Insert self first so RLS checks for adding other participants can pass reliably.
-    const { error: addSelfError } = await supabase
-      .from("conversation_participants")
-      .insert({ conversation_id: convo.id, user_id: user.id });
-    if (addSelfError) {
-      toast({ title: "Could not initialize conversation", description: addSelfError.message, variant: "destructive" });
-      setCreatingConversationFor(null);
-      return;
-    }
-
-    const { error: addOtherError } = await supabase
-      .from("conversation_participants")
-      .insert({ conversation_id: convo.id, user_id: otherUserId });
-    if (addOtherError) {
-      toast({ title: "Could not add participant", description: addOtherError.message, variant: "destructive" });
-      setCreatingConversationFor(null);
-      return;
-    }
 
     setShowNewChat(false);
-    setActiveConvo(convo.id);
+    setActiveConvo(conversationId);
     loadConversations();
     setCreatingConversationFor(null);
   };
@@ -351,7 +301,7 @@ export default function ChatPage() {
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
                 >
                   <div className="w-10 h-10 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm relative">
-                    {profile.display_name?.[0]?.toUpperCase() || "?"}
+                    {getInitials(profile.display_name)}
                     <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background z-20 ${statusColors[profile.availability_status || "available"] || statusColors.available}`} />
                   </div>
                   <div className="flex-1">
@@ -369,9 +319,19 @@ export default function ChatPage() {
                   <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : conversations.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                  <p className="text-muted-foreground">No conversations yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">Tap + to start chatting with fellow travelers</p>
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-4">
+                  <div className="w-16 h-16 rounded-full gradient-sunset flex items-center justify-center shadow-lg">
+                    <MessageCircle className="w-8 h-8 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-foreground">No messages yet!</h3>
+                    <p className="text-sm text-muted-foreground mt-2 max-w-[250px]">
+                      Find a travel buddy and tap Message on their profile to start chatting.
+                    </p>
+                  </div>
+                  <Button onClick={() => navigate("/search")} className="mt-4 w-full max-w-[200px] rounded-full gradient-sunset text-primary-foreground">
+                    Find Buddies
+                  </Button>
                 </div>
               ) : (
                 conversations.map((convo) => (
@@ -381,7 +341,7 @@ export default function ChatPage() {
                     className="w-full flex items-center gap-3 p-4 border-b border-border hover:bg-muted transition-colors text-left"
                   >
                     <div className="w-12 h-12 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold">
-                      {convo.other_user?.display_name?.[0]?.toUpperCase() || "?"}
+                      {getInitials(convo.other_user?.display_name)}
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">{convo.other_user?.display_name || "Traveler"}</p>
@@ -401,7 +361,7 @@ export default function ChatPage() {
               <ArrowLeft className="w-5 h-5 text-foreground" />
             </button>
             <div className="w-8 h-8 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-xs">
-              {activeConvoData?.other_user?.display_name?.[0]?.toUpperCase() || "?"}
+              {getInitials(activeConvoData?.other_user?.display_name)}
             </div>
             <p className="font-semibold text-foreground">{activeConvoData?.other_user?.display_name || "Traveler"}</p>
           </div>
@@ -409,13 +369,16 @@ export default function ChatPage() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.sender_id === user?.id ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm ${
+              <div key={msg.id} className={`flex flex-col ${msg.sender_id === user?.id ? "items-end" : "items-start"}`}>
+                <div className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm flex flex-col ${
                   msg.sender_id === user?.id
                     ? "gradient-sunset text-primary-foreground rounded-br-md"
                     : "bg-muted text-foreground rounded-bl-md"
                 }`}>
-                  {msg.content}
+                  <span>{msg.content}</span>
+                  <span className={`text-[9px] mt-1 text-right font-medium ${msg.sender_id === user?.id ? "text-primary-foreground/70" : "text-muted-foreground/70"}`}>
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
               </div>
             ))}

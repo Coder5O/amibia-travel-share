@@ -5,6 +5,7 @@ import { Heart, MapPin, MessageCircle, Send, Flag, MoreHorizontal } from "lucide
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { getInitials } from "@/lib/utils";
 
 interface Post {
   id: string;
@@ -122,7 +123,7 @@ export default function PostFeed() {
               {post.profile?.avatar_url ? (
                 <img src={post.profile.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
               ) : (
-                post.profile?.display_name?.[0]?.toUpperCase() || "?"
+                getInitials(post.profile?.display_name)
               )}
             </div>
             <div className="flex-1 min-w-0">

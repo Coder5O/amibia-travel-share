@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import LeaveReviewDialog from "./LeaveReviewDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getConversationErrorMessage, startOrGetConversation } from "@/lib/chatConversations";
+import { getInitials } from "@/lib/utils";
 
 interface UserProfileDialogProps {
   userId: string | null;
@@ -59,39 +61,22 @@ export default function UserProfileDialog({ userId, open, onOpenChange }: UserPr
   const startChat = async () => {
     if (!currentUser || !profile) return;
     try {
-      // Check if conversation already exists
-      const { data: myConvos } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id")
-        .eq("user_id", currentUser.id);
-
-      const { data: theirConvos } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id")
-        .eq("user_id", profile.user_id);
-
-      const myIds = new Set(myConvos?.map(c => c.conversation_id) || []);
-      const commonConvo = theirConvos?.find(c => myIds.has(c.conversation_id));
-
-      if (commonConvo) {
-        onOpenChange(false);
-        navigate('/chat', { state: { conversationId: commonConvo.conversation_id } });
+      const { conversationId, error } = await startOrGetConversation(currentUser.id, profile.user_id);
+      if (error || !conversationId) {
+        toast({
+          title: "Could not start chat",
+          description: getConversationErrorMessage((error as any)?.message),
+          variant: "destructive",
+        });
         return;
       }
 
-      // Create new conversation
-      const { data: convo, error: convoErr } = await supabase.from("conversations").insert({}).select().single();
-      if (convoErr) throw convoErr;
-
-      await supabase.from("conversation_participants").insert([
-        { conversation_id: convo.id, user_id: currentUser.id },
-        { conversation_id: convo.id, user_id: profile.user_id },
-      ]);
-
-      onOpenChange(false);
-      navigate('/chat', { state: { conversationId: convo.id } });
+      if (conversationId) {
+        onOpenChange(false);
+        navigate('/chat', { state: { conversationId } });
+      }
     } catch (err: any) {
-      toast({ title: "Could not start chat", description: err.message, variant: "destructive" });
+      toast({ title: "Could not start chat", description: getConversationErrorMessage(err?.message), variant: "destructive" });
     }
   };
 
@@ -135,7 +120,7 @@ export default function UserProfileDialog({ userId, open, onOpenChange }: UserPr
                     <img src={profile.avatar_url} alt={profile.display_name} className="w-20 h-20 rounded-full border-4 border-background object-cover bg-background" />
                   ) : (
                     <div className="w-20 h-20 rounded-full border-4 border-background gradient-sunset flex items-center justify-center text-primary-foreground text-2xl font-bold">
-                      {profile.display_name?.[0]?.toUpperCase() || "?"}
+                      {getInitials(profile.display_name)}
                     </div>
                   )}
                 </div>
@@ -161,6 +146,12 @@ export default function UserProfileDialog({ userId, open, onOpenChange }: UserPr
                          Fun Fact
                       </p>
                       <p className="text-sm text-foreground">{profile.fun_fact}</p>
+                    </div>
+                  )}
+
+                  {profile.travel_vibe && (
+                    <div className="inline-block px-3 py-1.5 rounded-full bg-muted border border-border text-xs font-medium text-foreground mb-2">
+                      {profile.travel_vibe === "chatty" ? "I'm chatty 💬" : profile.travel_vibe === "quiet" ? "I prefer quiet 🤫" : "Depends on the vibe 🎲"}
                     </div>
                   )}
 

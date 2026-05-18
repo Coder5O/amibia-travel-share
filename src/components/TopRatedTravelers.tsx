@@ -4,6 +4,7 @@ import { Star, ShieldCheck, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import LeaveReviewDialog from "@/components/LeaveReviewDialog";
+import { getInitials } from "@/lib/utils";
 
 const ACTIVITIES = [
   { key: "lunch", label: "Casual Dining (Lunch)", emoji: "🥗" },
@@ -154,7 +155,7 @@ export default function TopRatedTravelers() {
                         />
                       ) : (
                         <div className="w-12 h-12 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold">
-                          {p.display_name?.[0]?.toUpperCase() || "?"}
+                          {getInitials(p.display_name)}
                         </div>
                       )}
                       {p.verified && (

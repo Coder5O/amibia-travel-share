@@ -174,22 +174,32 @@ export default function LocationDetailPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex gap-3">
-          <Button 
-            onClick={toggleSave} 
-            variant={saved ? "secondary" : "default"}
-            className={`flex-1 h-12 rounded-2xl font-bold transition-all ${!saved && "gradient-sunset text-primary-foreground shadow-lg shadow-primary/20"}`}
-          >
-            <Bookmark className={`w-5 h-5 mr-2 ${saved ? "fill-current" : ""}`} />
-            {saved ? "Saved" : "Save Place"}
-          </Button>
+        <div className="mt-6 flex flex-col gap-3">
+          <div className="flex gap-3">
+            <Button 
+              onClick={toggleSave} 
+              variant={saved ? "secondary" : "default"}
+              className={`flex-1 h-12 rounded-2xl font-bold transition-all ${!saved && "gradient-sunset text-primary-foreground shadow-lg shadow-primary/20"}`}
+            >
+              <Bookmark className={`w-5 h-5 mr-2 ${saved ? "fill-current" : ""}`} />
+              {saved ? "Saved" : "Save Place"}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/trips")} 
+              className="flex-1 h-12 rounded-2xl font-bold border-2"
+            >
+              <Calendar className="w-5 h-5 mr-2" />
+              Plan Trip
+            </Button>
+          </div>
           <Button 
             variant="outline" 
-            onClick={() => navigate("/trips")} 
-            className="flex-1 h-12 rounded-2xl font-bold border-2"
+            onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.name + ' Namibia')}`, '_blank')} 
+            className="w-full h-12 rounded-2xl font-bold border-2 bg-muted/30"
           >
-            <Calendar className="w-5 h-5 mr-2" />
-            Plan Trip
+            <MapPin className="w-5 h-5 mr-2" />
+            View on Map
           </Button>
         </div>
 

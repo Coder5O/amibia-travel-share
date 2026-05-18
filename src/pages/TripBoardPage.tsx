@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Calendar, Users, DollarSign, Plus, X, Calculator, Check, Clock, Edit2 } from "lucide-react";
+import { MapPin, Calendar, Users, DollarSign, Plus, X, Calculator, Check, Clock, Edit2, Share2 } from "lucide-react";
 import UserProfileDialog from "@/components/UserProfileDialog";
+import { getInitials } from "@/lib/utils";
 
 interface Trip {
   id: string;
@@ -274,7 +275,7 @@ export default function TripBoardPage() {
                     <img src={trip.profile.avatar_url} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-border" />
                   ) : (
                     <div className="w-10 h-10 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-sm">
-                      {trip.profile?.display_name?.[0]?.toUpperCase() || "?"}
+                      {getInitials(trip.profile?.display_name)}
                     </div>
                   )}
                 </button>
@@ -304,6 +305,10 @@ export default function TripBoardPage() {
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => setShowCalc(showCalc === trip.id ? null : trip.id)} className="text-xs">
                 <Calculator className="w-3 h-3 mr-1" /> Split Cost
+              </Button>
+              
+              <Button size="sm" variant="outline" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Hey! Check out this trip to ${trip.destination} on ${new Date(trip.departure_date).toLocaleDateString()} via VoyageBuddy: https://voyagebuddy.app/trips`)}`, '_blank')} className="text-xs">
+                <Share2 className="w-3 h-3 mr-1" /> Share
               </Button>
 
               {user && trip.user_id === user.id && (

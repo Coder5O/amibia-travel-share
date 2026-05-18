@@ -13,15 +13,23 @@ DELETE FROM public.profiles WHERE user_id::text LIKE '00000000-0000-0000-0000-%'
 INSERT INTO public.locations (name, description, image_url, category, rating, visit_count, region)
 VALUES 
   -- Nature & Sightseeing
-  ('Sossusvlei', 'A salt and clay pan surrounded by high red dunes, located in the southern part of the Namib Desert.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Dune_45%2C_Sossusvlei_%282017%29.jpg', 'nature', 4.9, 15400, 'Hardap Region'),
-  ('Etosha National Park', 'One of Africa''s greatest wildlife parks, featuring a massive salt pan and abundant wildlife.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Etosha_National_Park%2C_Namibia_%282856072100%29.jpg', 'nature', 4.8, 12000, 'Kunene Region'),
-  ('Swakopmund', 'A coastal city with German colonial architecture, known for adventure sports and beautiful beaches.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Jetty%2C_Swakopmund%2C_Namibia%2C_2018-08-04%2C_DD_68-70_HDR.jpg', 'city', 4.6, 9500, 'Erongo Region'),
+  ('Sossusvlei', 'A salt and clay pan surrounded by high red dunes, located in the southern part of the Namib Desert.', 'https://images.unsplash.com/photo-1535941339077-2dd1c7963098?auto=format&fit=crop&q=80&w=1200', 'nature', 4.9, 15400, 'Hardap Region'),
+  ('Etosha National Park', 'One of Africa''s greatest wildlife parks, featuring a massive salt pan and abundant wildlife.', 'https://images.unsplash.com/photo-1549366021-9f761d450615?auto=format&fit=crop&q=80&w=1200', 'nature', 4.8, 12000, 'Kunene Region'),
+  ('Swakopmund', 'A coastal city with German colonial architecture, known for adventure sports and beautiful beaches.', 'https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&q=80&w=1200', 'city', 4.6, 9500, 'Erongo Region'),
+  ('Spitzkoppe', 'Dramatic granite peaks known as the "Matterhorn of Namibia" - perfect for climbing and hiking.', 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&q=80&w=1200', 'nature', 4.7, 6800, 'Erongo Region'),
+  ('Fish River Canyon', 'The second largest canyon in the world, offering spectacular hiking trails and viewpoints.', 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&q=80&w=1200', 'nature', 4.8, 7200, 'Karas Region'),
+  ('Walvis Bay', 'Coastal town famous for flamingos, oysters, and marine wildlife in the Atlantic Ocean.', 'https://images.unsplash.com/photo-TZxI0KBCl-8/download?force=true', 'city', 4.5, 5400, 'Erongo Region'),
   
   -- Windhoek Clubs & Nightlife
-  ('Brewers Market', 'Popular spot in Windhoek for live music, craft beer, and a lively weekend crowd.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg', 'club', 4.5, 3200, 'Khomas Region'),
-  ('Chopsi''s Bar', 'Vibrant nightlife venue in the heart of Windhoek. Great music, cocktails, and dancing.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg', 'club', 4.6, 4500, 'Khomas Region'),
-  ('The Social Club', 'Upscale lounge and nightclub perfect for Friday night hangouts and meeting locals.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg', 'club', 4.4, 2800, 'Khomas Region'),
-  ('Andy''s Pub', 'A relaxed pub with great food, cold drinks, and a welcoming atmosphere.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Windhoek-Skyline.jpg', 'restaurant', 4.3, 1500, 'Khomas Region');
+  ('Brewers Market', 'Popular spot in Windhoek for live music, craft beer, and a lively weekend crowd.', 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=1200', 'club', 4.5, 3200, 'Khomas Region'),
+  ('Chopsi''s Bar', 'Vibrant nightlife venue in the heart of Windhoek. Great music, cocktails, and dancing.', 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&q=80&w=1200', 'club', 4.6, 4500, 'Khomas Region'),
+  ('The Social Club', 'Upscale lounge and nightclub perfect for Friday night hangouts and meeting locals.', 'https://images.unsplash.com/photo-1574096079513-d8259312b785?auto=format&fit=crop&q=80&w=1200', 'club', 4.4, 2800, 'Khomas Region'),
+  ('Andy''s Pub', 'A relaxed pub with great food, cold drinks, and a welcoming atmosphere.', 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&q=80&w=1200', 'restaurant', 4.3, 1500, 'Khomas Region'),
+  
+  -- Restaurants & Food Venues
+  ('Joe''s Beerhouse', 'Iconic Windhoek restaurant serving authentic German-Namibian cuisine since 1991.', 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=1200', 'restaurant', 4.6, 8900, 'Khomas Region'),
+  ('The Stellenbosch Wine Bar', 'Upscale dining venue specializing in sushi and fine wines in Windhoek.', 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=1200', 'restaurant', 4.4, 2100, 'Khomas Region'),
+  ('Single Quarters', 'Famous for Kapana - traditional Namibian street food and local gathering spot.', 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1200', 'restaurant', 4.2, 3800, 'Khomas Region');
 
 -- STEP 4: Insert 15 Dummy Travel Buddies
 INSERT INTO public.profiles (

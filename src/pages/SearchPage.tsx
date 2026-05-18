@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import LeaveReviewDialog from "@/components/LeaveReviewDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { getInitials } from "@/lib/utils";
+import UserProfileDialog from "@/components/UserProfileDialog";
 
 const categoryBadge: Record<string, { label: string; emoji: string }> = {
   has_means: { label: "Has Means", emoji: "🚗" },
@@ -34,6 +35,7 @@ export default function SearchPage() {
   const [filterTo, setFilterTo] = useState("");
   const [filterDestination, setFilterDestination] = useState("");
   const [reviewTarget, setReviewTarget] = useState<{ userId: string; name: string } | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => { loadProfiles(); }, [user?.id]);
@@ -215,7 +217,7 @@ export default function SearchPage() {
           const isSelf = user?.id === profile.user_id;
           return (
             <div key={profile.id} className="bg-card rounded-2xl border border-border p-4 animate-scale-in hover:border-primary/40 transition-colors">
-              <div onClick={() => navigate(`/chat`)} className="cursor-pointer">
+              <div onClick={() => setSelectedUserId(profile.user_id)} className="cursor-pointer">
                 <div className="relative mx-auto w-14 h-14 mb-3">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile.display_name} className="w-14 h-14 rounded-full object-cover" />
@@ -268,6 +270,12 @@ export default function SearchPage() {
           reviewedDisplayName={reviewTarget.name}
         />
       )}
+
+      <UserProfileDialog
+        open={!!selectedUserId}
+        onOpenChange={(o) => !o && setSelectedUserId(null)}
+        userId={selectedUserId}
+      />
     </div>
   );
 }

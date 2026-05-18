@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import LeaveReviewDialog from "@/components/LeaveReviewDialog";
 import { getInitials } from "@/lib/utils";
+import UserProfileDialog from "@/components/UserProfileDialog";
 
 const ACTIVITIES = [
   { key: "lunch", label: "Casual Dining (Lunch)", emoji: "🥗" },
@@ -37,6 +38,7 @@ export default function TopRatedTravelers() {
   const [ratings, setRatings] = useState<Record<string, { avg: number; count: number }>>({});
   const [loading, setLoading] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{ userId: string; name: string } | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activity) {
@@ -140,7 +142,7 @@ export default function TopRatedTravelers() {
                   className="bg-card border border-border rounded-2xl p-3 hover:border-primary/40 transition-colors"
                 >
                   <button
-                    onClick={() => navigate("/chat")}
+                    onClick={() => setSelectedUserId(p.user_id)}
                     className="w-full flex items-center gap-3 text-left"
                   >
                     <span className="w-6 text-sm font-bold text-muted-foreground">
@@ -216,6 +218,12 @@ export default function TopRatedTravelers() {
           onSubmitted={() => activity && loadTopRated(activity)}
         />
       )}
+
+      <UserProfileDialog
+        open={!!selectedUserId}
+        onOpenChange={(o) => !o && setSelectedUserId(null)}
+        userId={selectedUserId}
+      />
     </div>
   );
 }

@@ -127,7 +127,7 @@ export default function PostFeed() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-foreground truncate">{post.profile?.display_name || "Traveler"}</p>
+              <p className="font-semibold text-sm text-foreground truncate">{post.profile?.display_name || "Buddy"}</p>
               {post.location_name && (
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{post.location_name}</p>
               )}

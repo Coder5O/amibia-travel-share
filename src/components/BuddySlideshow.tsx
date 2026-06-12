@@ -97,7 +97,7 @@ export default function BuddySlideshow() {
         <div className="flex touch-pan-y">
           {profiles.map((current, index) => {
             const Cat = categoryMeta[current.category]?.icon || Users;
-            const catLabel = categoryMeta[current.category]?.label || "Traveler";
+            const catLabel = categoryMeta[current.category]?.label || "Buddy";
             const statusDot = statusColors[current.availability_status || "available"] || statusColors.available;
 
             return (

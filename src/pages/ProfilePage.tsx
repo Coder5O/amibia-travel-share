@@ -203,7 +203,7 @@ export default function ProfilePage() {
 
   if (!profile) return <div className="flex items-center justify-center h-64 text-muted-foreground">Loading...</div>;
 
-  const badge = categoryBadge[profile.category] || { label: "Traveler", emoji: "🌍" };
+  const badge = categoryBadge[profile.category] || { label: "Buddy", emoji: "🌍" };
   const avgRating = ratings.length ? (ratings.reduce((s: number, r: any) => s + r.score, 0) / ratings.length).toFixed(1) : null;
   const { percent: completionPercent, missing: missingFields } = getProfileCompletion(profile);
 

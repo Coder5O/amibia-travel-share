@@ -189,6 +189,7 @@ export type Database = {
           created_at: string
           id: string
           sender_id: string
+          read: boolean
         }
         Insert: {
           content: string
@@ -196,6 +197,7 @@ export type Database = {
           created_at?: string
           id?: string
           sender_id: string
+          read?: boolean
         }
         Update: {
           content?: string
@@ -203,6 +205,7 @@ export type Database = {
           created_at?: string
           id?: string
           sender_id?: string
+          read?: boolean
         }
         Relationships: [
           {
@@ -213,6 +216,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          actor_id: string
+          type: string
+          reference_id: string | null
+          read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          actor_id: string
+          type: string
+          reference_id?: string | null
+          read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          actor_id?: string
+          type?: string
+          reference_id?: string | null
+          read?: boolean
+          created_at?: string
+        }
+        Relationships: []
       }
       posts: {
         Row: {
@@ -430,6 +463,8 @@ export type Database = {
           departure_date: string
           description: string | null
           destination: string
+          origin: string
+          waypoints: string[] | null
           id: string
           region: string | null
           return_date: string | null
@@ -445,6 +480,8 @@ export type Database = {
           departure_date: string
           description?: string | null
           destination: string
+          origin?: string
+          waypoints?: string[] | null
           id?: string
           region?: string | null
           return_date?: string | null
@@ -460,6 +497,8 @@ export type Database = {
           departure_date?: string
           description?: string | null
           destination?: string
+          origin?: string
+          waypoints?: string[] | null
           id?: string
           region?: string | null
           return_date?: string | null

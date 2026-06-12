@@ -101,7 +101,7 @@ export default function OnboardingPage({ onComplete }: OnboardingProps) {
         {step === 1 && (
           <div className="flex-1 flex flex-col animate-slide-in">
             <h2 className="text-2xl font-bold text-foreground mt-4">Add your photo</h2>
-            <p className="text-muted-foreground text-sm mt-1 mb-8">Let other travelers see who you are</p>
+            <p className="text-muted-foreground text-sm mt-1 mb-8">Let other buddies see who you are</p>
 
             <div className="flex-1 flex items-center justify-center">
               <label className="cursor-pointer">

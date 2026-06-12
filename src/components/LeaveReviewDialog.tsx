@@ -53,7 +53,7 @@ export default function LeaveReviewDialog({ open, onOpenChange, reviewedUserId, 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Rate {reviewedDisplayName || "this traveler"}</DialogTitle>
+          <DialogTitle>Rate {reviewedDisplayName || "this buddy"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex justify-center gap-1" onMouseLeave={() => setHover(0)}>

@@ -102,7 +102,7 @@ export default function UserProfileDialog({ userId, open, onOpenChange }: UserPr
                     </h2>
                     {profile.category && (
                       <span className="inline-flex items-center gap-1 mt-1 px-3 py-1 rounded-full bg-primary-foreground/20 text-primary-foreground text-xs font-medium">
-                        <CategoryIcon className="w-3 h-3" /> {categoryLabels[profile.category] || "Traveler"}
+                        <CategoryIcon className="w-3 h-3" /> {categoryLabels[profile.category] || "Buddy"}
                       </span>
                     )}
                     {avgRating && (

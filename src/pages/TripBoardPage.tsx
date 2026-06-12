@@ -13,6 +13,8 @@ import { getInitials } from "@/lib/utils";
 interface Trip {
   id: string;
   user_id: string;
+  origin: string;
+  waypoints?: string[] | null;
   destination: string;
   departure_date: string;
   return_date: string | null;
@@ -51,6 +53,8 @@ export default function TripBoardPage() {
   const [editingTripId, setEditingTripId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [form, setForm] = useState({
+    origin: "Windhoek",
+    waypointsText: "",
     destination: "",
     custom_destination: "",
     departure_date: "",
@@ -122,6 +126,8 @@ export default function TripBoardPage() {
 
     const payload = {
       user_id: user.id,
+      origin: form.origin || "Windhoek",
+      waypoints: form.waypointsText.split(',').map(s => s.trim()).filter(Boolean),
       destination: finalDest,
       departure_date: form.departure_date,
       departure_time: form.departure_time || null,
@@ -156,12 +162,14 @@ export default function TripBoardPage() {
   const resetForm = () => {
     setShowCreate(false);
     setEditingTripId(null);
-    setForm({ destination: "", custom_destination: "", departure_date: "", departure_time: "", return_date: "", available_seats: "2", budget: "", cost_split_method: "equal", trip_type: "Day Trip", description: "", region: "" });
+    setForm({ origin: "Windhoek", waypointsText: "", destination: "", custom_destination: "", departure_date: "", departure_time: "", return_date: "", available_seats: "2", budget: "", cost_split_method: "equal", trip_type: "Day Trip", description: "", region: "" });
   };
 
   const startEdit = (trip: Trip) => {
     const isPreset = WINDHOEK_CLUBS.includes(trip.destination);
     setForm({
+      origin: trip.origin || "Windhoek",
+      waypointsText: trip.waypoints?.join(', ') || "",
       destination: isPreset ? trip.destination : "Other",
       custom_destination: isPreset ? "" : trip.destination,
       departure_date: trip.departure_date,
@@ -192,6 +200,14 @@ export default function TripBoardPage() {
 
       {showCreate && (
         <div className="bg-card rounded-2xl border border-border p-4 mb-6 animate-slide-in space-y-3">
+          <div>
+            <Label>Origin</Label>
+            <Input className="mt-1 mb-3" value={form.origin} onChange={(e) => setForm({ ...form, origin: e.target.value })} placeholder="Windhoek" />
+          </div>
+          <div>
+            <Label>Intermediate Stops (optional)</Label>
+            <Input className="mt-1 mb-3" value={form.waypointsText} onChange={(e) => setForm({ ...form, waypointsText: e.target.value })} placeholder="e.g. Okahandja, Karibib" />
+          </div>
           <div>
             <Label>Destination</Label>
             <select
@@ -280,11 +296,14 @@ export default function TripBoardPage() {
                   )}
                 </button>
                 <div>
-                  <h3 className="font-bold text-foreground flex items-center gap-1">
-                    <MapPin className="w-4 h-4 text-primary" /> {trip.destination}
+                  <h3 className="font-bold text-foreground flex items-center gap-1 text-sm flex-wrap">
+                    <MapPin className="w-4 h-4 text-primary flex-shrink-0" /> 
+                    {trip.origin} 
+                    {trip.waypoints && trip.waypoints.length > 0 ? " ➔ " + trip.waypoints.join(" ➔ ") + " " : " ➔ "}
+                    {trip.destination}
                   </h3>
                   <button onClick={() => setSelectedUserId(trip.user_id)} className="text-xs text-muted-foreground mt-0.5 text-left hover:underline">
-                    {categoryEmoji[trip.profile?.category || ""] || ""} {trip.profile?.display_name || "Traveler"}
+                    {categoryEmoji[trip.profile?.category || ""] || ""} {trip.profile?.display_name || "Buddy"}
                   </button>
                 </div>
               </div>

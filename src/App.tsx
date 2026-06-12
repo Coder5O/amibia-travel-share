@@ -14,9 +14,11 @@ import ProfilePage from "./pages/ProfilePage";
 import LocationDetailPage from "./pages/LocationDetailPage";
 import SavedPlacesPage from "./pages/SavedPlacesPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 import SOSButton from "./components/SOSButton";
+import TutorialOverlay from "./components/TutorialOverlay";
 import { useState } from "react";
 
 const queryClient = new QueryClient();
@@ -48,10 +50,12 @@ function AppRoutes() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/location/:id" element={<LocationDetailPage />} />
           <Route path="/saved" element={<SavedPlacesPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/onboarding" element={<OnboardingPage onComplete={() => window.location.href = '/'} />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      <TutorialOverlay />
       <SOSButton />
       <BottomNav />
     </div>

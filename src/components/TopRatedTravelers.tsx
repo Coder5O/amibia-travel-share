@@ -98,7 +98,7 @@ export default function TopRatedTravelers() {
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Star className="w-4 h-4 fill-accent text-accent" />
-        <h2 className="text-base font-semibold text-foreground">Top Rated Travelers</h2>
+        <h2 className="text-base font-semibold text-foreground">Top Rated Buddies</h2>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
         Pick an activity to see top rated buddies for it.
@@ -128,7 +128,7 @@ export default function TopRatedTravelers() {
           {!loading && profiles.length === 0 && (
             <div className="bg-card border border-border rounded-2xl p-6 text-center">
               <p className="text-sm text-muted-foreground">
-                No travelers listed for this activity yet.
+                No buddies listed for this activity yet.
               </p>
             </div>
           )}

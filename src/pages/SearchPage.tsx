@@ -96,13 +96,13 @@ export default function SearchPage() {
 
   return (
     <div className="max-w-lg mx-auto pb-24">
-      <h2 className="text-xl font-bold text-foreground mb-4">Find Travelers</h2>
+      <h2 className="text-xl font-bold text-foreground mb-4">Find Buddies</h2>
 
       {/* Search bar */}
       <div className="flex gap-2 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search travelers..." className="pl-9" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search buddies..." className="pl-9" />
         </div>
         <Button variant="outline" size="icon" onClick={() => setShowFilters(!showFilters)} className="relative">
           <SlidersHorizontal className="w-4 h-4" />
@@ -132,7 +132,7 @@ export default function SearchPage() {
           </div>
 
           <div>
-            <Label className="text-xs">Region</Label>
+            <Label className="text-xs">Town/City</Label>
             <div className="flex flex-wrap gap-2 mt-1">
               {regions.map((r) => (
                 <button key={r} onClick={() => setFilterRegion(filterRegion === r ? null : r)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filterRegion === r ? "gradient-sunset text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
@@ -212,7 +212,7 @@ export default function SearchPage() {
       {/* Profiles grid */}
       <div className="grid grid-cols-2 gap-3">
         {filtered.map((profile) => {
-          const badge = categoryBadge[profile.category] || { label: "Traveler", emoji: "🌍" };
+          const badge = categoryBadge[profile.category] || { label: "Buddy", emoji: "🌍" };
           const rating = ratingsByUser[profile.user_id];
           const isSelf = user?.id === profile.user_id;
           return (
@@ -260,7 +260,7 @@ export default function SearchPage() {
         })}
       </div>
 
-      {filtered.length === 0 && <p className="text-center text-muted-foreground py-12">No travelers found.</p>}
+      {filtered.length === 0 && <p className="text-center text-muted-foreground py-12">No buddies found.</p>}
 
       {reviewTarget && (
         <LeaveReviewDialog

@@ -344,7 +344,7 @@ export default function ChatPage() {
                       {getInitials(convo.other_user?.display_name)}
                     </div>
                     <div>
-                      <p className="font-semibold text-foreground">{convo.other_user?.display_name || "Traveler"}</p>
+                      <p className="font-semibold text-foreground">{convo.other_user?.display_name || "Buddy"}</p>
                       <p className="text-xs text-muted-foreground">Tap to chat</p>
                     </div>
                   </button>
@@ -363,7 +363,7 @@ export default function ChatPage() {
             <div className="w-8 h-8 rounded-full gradient-sunset flex items-center justify-center text-primary-foreground font-bold text-xs">
               {getInitials(activeConvoData?.other_user?.display_name)}
             </div>
-            <p className="font-semibold text-foreground">{activeConvoData?.other_user?.display_name || "Traveler"}</p>
+            <p className="font-semibold text-foreground">{activeConvoData?.other_user?.display_name || "Buddy"}</p>
           </div>
 
           {/* Messages */}

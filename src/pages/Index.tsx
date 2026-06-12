@@ -9,7 +9,7 @@ import TopRatedTravelers from "@/components/TopRatedTravelers";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Bell } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import UserProfileDialog from "@/components/UserProfileDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +27,7 @@ export default function Index() {
   const [buddies, setBuddies] = useState<any[]>([]);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [feedKey, setFeedKey] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [emblaRef] = useEmblaCarousel({ dragFree: true, align: "start" });
   const { toast } = useToast();
@@ -67,6 +68,33 @@ export default function Index() {
   }, [user, toast]);
 
   useEffect(() => {
+    if (!user) return;
+    
+    const fetchUnread = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      setUnreadNotifications(count || 0);
+    };
+
+    fetchUnread();
+
+    const channel = supabase
+      .channel('public:notifications')
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => {
+        fetchUnread();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => {
+        fetchUnread();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  useEffect(() => {
     supabase.from("profiles")
       .select("*")
       .order("created_at", { ascending: false })
@@ -95,12 +123,23 @@ export default function Index() {
             <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Namibia 🇳🇦</span>
           </div>
         </div>
-        <button 
-          onClick={() => navigate("/search")}
-          className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
-        >
-          <Search className="w-5 h-5 text-foreground" />
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => navigate("/search")}
+            className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+          >
+            <Search className="w-5 h-5 text-foreground" />
+          </button>
+          <button 
+            onClick={() => navigate("/notifications")}
+            className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors relative"
+          >
+            <Bell className="w-5 h-5 text-foreground" />
+            {unreadNotifications > 0 && (
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 border-2 border-muted/50" />
+            )}
+          </button>
+        </div>
       </header>
 
       {/* Stories Style Buddy Scroll */}

@@ -206,7 +206,7 @@ export default function LocationDetailPage() {
         {/* Nearby Buddies Section */}
         <section className="mt-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">Travelers Interested</h2>
+            <h2 className="text-lg font-bold text-foreground">Buddies Interested</h2>
             <button className="text-xs font-bold text-primary">View all</button>
           </div>
           
@@ -231,7 +231,7 @@ export default function LocationDetailPage() {
             ))}
             {nearbyBuddies.length === 0 && (
               <div className="text-xs text-muted-foreground w-full py-8 text-center bg-muted/20 rounded-2xl border border-dashed">
-                No travelers found nearby yet.
+                No buddies found nearby yet.
               </div>
             )}
           </div>

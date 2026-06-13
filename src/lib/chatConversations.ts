@@ -49,19 +49,19 @@ export async function startOrGetConversation(currentUserId: string, otherUserId:
     return { conversationId: existing.conversationId, error: null };
   }
 
-  const { data: convo, error: createConvoError } = await supabase
-    .from("conversations")
-    .insert({})
-    .select()
-    .single();
+  const newConvoId = crypto.randomUUID();
 
-  if (createConvoError || !convo) {
-    return { conversationId: null, error: createConvoError || new Error("Conversation creation was blocked.") };
+  const { error: createConvoError } = await supabase
+    .from("conversations")
+    .insert({ id: newConvoId });
+
+  if (createConvoError) {
+    return { conversationId: null, error: createConvoError };
   }
 
   const { error: addSelfError } = await supabase
     .from("conversation_participants")
-    .insert({ conversation_id: convo.id, user_id: currentUserId });
+    .insert({ conversation_id: newConvoId, user_id: currentUserId });
 
   if (addSelfError) {
     return { conversationId: null, error: addSelfError };
@@ -69,11 +69,11 @@ export async function startOrGetConversation(currentUserId: string, otherUserId:
 
   const { error: addOtherError } = await supabase
     .from("conversation_participants")
-    .insert({ conversation_id: convo.id, user_id: otherUserId });
+    .insert({ conversation_id: newConvoId, user_id: otherUserId });
 
   if (addOtherError) {
     return { conversationId: null, error: addOtherError };
   }
 
-  return { conversationId: convo.id, error: null };
+  return { conversationId: newConvoId, error: null };
 }

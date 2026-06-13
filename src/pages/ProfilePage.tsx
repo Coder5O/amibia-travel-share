@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, MapPin, Edit2, Save, Phone, AlertTriangle, Star, Bookmark, Map, ShieldCheck, X, Car, Users, Crown, ChevronRight } from "lucide-react";
+import { Heart, Car, Star, LogOut, Image, Info, Save, Settings, X, Plus, ShieldCheck, MapPin, Search, PlusCircle, AlertTriangle, ChevronRight, Phone, Camera, Moon, Sun, Monitor } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
 import { useNavigate } from "react-router-dom";
 import CreatePostDialog from "@/components/CreatePostDialog";
 import { getInitials } from "@/lib/utils";
@@ -55,6 +56,8 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const { theme, setTheme } = useTheme();
+  
   const [profile, setProfile] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("posts");
@@ -573,6 +576,21 @@ export default function ProfilePage() {
             )}
           </div>
         )}
+
+        <div className="mt-6 pt-4 border-t border-border">
+          <h3 className="font-semibold text-foreground text-sm mb-3">Preferences</h3>
+          <div className="bg-muted rounded-xl p-1 flex items-center justify-between">
+            <button onClick={() => setTheme("light")} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all ${theme === "light" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+              <Sun className="w-4 h-4" /> Light
+            </button>
+            <button onClick={() => setTheme("dark")} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all ${theme === "dark" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+              <Moon className="w-4 h-4" /> Dark
+            </button>
+            <button onClick={() => setTheme("system")} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all ${theme === "system" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+              <Monitor className="w-4 h-4" /> System
+            </button>
+          </div>
+        </div>
 
         <Button variant="ghost" onClick={signOut} className="w-full text-destructive mt-4">Sign Out</Button>
       </div>

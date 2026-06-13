@@ -19,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 import SOSButton from "./components/SOSButton";
 import TutorialOverlay from "./components/TutorialOverlay";
+import { ThemeProvider } from "./components/ThemeProvider";
 import { useState } from "react";
 
 const queryClient = new QueryClient();
@@ -63,17 +64,19 @@ function AppRoutes() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;

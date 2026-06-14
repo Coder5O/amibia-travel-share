@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Car, Star, LogOut, Image, Info, Save, Settings, X, Plus, ShieldCheck, MapPin, Search, PlusCircle, AlertTriangle, ChevronRight, Phone, Camera, Moon, Sun, Monitor } from "lucide-react";
+import { Heart, Car, Star, LogOut, Image, Info, Save, Settings, X, Plus, ShieldCheck, MapPin, Search, PlusCircle, AlertTriangle, ChevronRight, Phone, Camera, Moon, Sun, Monitor, Users as UsersIcon, Crown } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { useNavigate } from "react-router-dom";
 import CreatePostDialog from "@/components/CreatePostDialog";
@@ -22,7 +22,7 @@ const categoryBadge: Record<string, { label: string; emoji: string }> = {
 
 const categoryOptions = [
   { value: "has_means", label: "Has the Means", desc: "I have a car or budget to travel", icon: Car },
-  { value: "needs_ride", label: "Needs the Means", desc: "Looking for a travel buddy with means", icon: Users },
+  { value: "needs_ride", label: "Needs the Means", desc: "Looking for a travel buddy with means", icon: UsersIcon },
   { value: "has_both", label: "Has Both", desc: "I'm flexible — car, budget & good vibes", icon: Crown },
 ];
 

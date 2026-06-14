@@ -1,4 +1,4 @@
-import { Car, Users, MapPin, ShieldCheck, Camera, MessageCircle } from "lucide-react";
+import { Car, Users as UsersIcon, MapPin, ShieldCheck, Camera, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 
@@ -9,7 +9,7 @@ interface Props {
 const highlights = [
   { icon: Car, title: "Find a ride or share yours", desc: "Connect with travellers who have a car, or with passengers ready to split the journey." },
   { icon: MapPin, title: "Discover Namibia", desc: "Explore Sossusvlei, Etosha, Fish River Canyon and the country's hidden gems." },
-  { icon: Users, title: "Travel buddies, your vibe", desc: "Filter by language, interests, gender and verified profiles." },
+  { icon: UsersIcon, title: "Travel buddies, your vibe", desc: "Filter by language, interests, gender and verified profiles." },
   { icon: ShieldCheck, title: "Built-in safety", desc: "Verified IDs, encrypted chat and an SOS button on every screen." },
 ];
 

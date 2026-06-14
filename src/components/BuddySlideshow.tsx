@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Calendar, ChevronLeft, ChevronRight, MessageCircle, ShieldCheck, Car, Users, Crown } from "lucide-react";
+import { MapPin, Calendar, ChevronLeft, ChevronRight, MessageCircle, ShieldCheck, Car, Users as UsersIcon, Crown } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useAuth } from "@/contexts/AuthContext";
 import UserProfileDialog from "@/components/UserProfileDialog";
@@ -25,7 +25,7 @@ interface Profile {
 
 const categoryMeta: Record<string, { label: string; icon: any }> = {
   has_means: { label: "Has the Means", icon: Car },
-  needs_ride: { label: "Needs the Means", icon: Users },
+  needs_ride: { label: "Needs the Means", icon: UsersIcon },
   has_both: { label: "Has Both", icon: Crown },
 };
 

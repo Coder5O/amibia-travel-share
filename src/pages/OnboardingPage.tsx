@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Camera, Car, Users, Crown, ShieldCheck, ArrowRight, ArrowLeft } from "lucide-react";
+import { Camera, Car, Users as UsersIcon, Crown, ShieldCheck, ArrowRight, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Category = "has_means" | "needs_ride" | "has_both";
 
 const categories = [
   { value: "has_means" as Category, label: "Has the Means", desc: "I have a car or budget to travel", icon: Car },
-  { value: "needs_ride" as Category, label: "Needs the Means", desc: "Looking for a travel buddy with means", icon: Users },
+  { value: "needs_ride" as Category, label: "Needs the Means", desc: "Looking for a travel buddy with means", icon: UsersIcon },
   { value: "has_both" as Category, label: "Has Both", desc: "I'm flexible — car, budget & good vibes", icon: Crown },
 ];
 

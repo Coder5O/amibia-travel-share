@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, ArrowRight, ArrowLeft, Download, MapPin, Users, ShieldCheck, Heart } from "lucide-react";
+import { X, ArrowRight, ArrowLeft, Download, MapPin, Users as UsersIcon, ShieldCheck, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const SLIDES = [
@@ -12,7 +12,7 @@ const SLIDES = [
   {
     title: "Find Your Perfect Travel Buddy",
     description: "Use the Search tab to browse verified profiles. Filter by town, trip type, or category (whether they have a car, need a ride, or both!).",
-    icon: Users,
+    icon: UsersIcon,
     color: "text-blue-500",
   },
   {

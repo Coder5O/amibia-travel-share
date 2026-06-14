@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, ShieldCheck, Star, MessageCircle, StarIcon, Info, Users, Car, Crown } from "lucide-react";
+import { MapPin, ShieldCheck, Star, MessageCircle, StarIcon, Info, Users as UsersIcon, Car, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import LeaveReviewDialog from "./LeaveReviewDialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +19,7 @@ interface UserProfileDialogProps {
 
 const categoryIcons: Record<string, any> = {
   has_means: Car,
-  needs_ride: Users,
+  needs_ride: UsersIcon,
   has_both: Crown,
 };
 

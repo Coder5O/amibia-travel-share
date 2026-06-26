@@ -106,7 +106,12 @@ export default function ChatPage() {
     const channel = supabase
       .channel(`messages-${activeConvo}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${activeConvo}` },
-        (payload) => setMessages((prev) => [...prev, payload.new as Message])
+        (payload) => {
+          setMessages((prev) => {
+            if (prev.some(m => m.id === payload.new.id)) return prev;
+            return [...prev, payload.new as Message];
+          });
+        }
       )
       .subscribe();
 

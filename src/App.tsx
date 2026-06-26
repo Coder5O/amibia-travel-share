@@ -15,6 +15,8 @@ import LocationDetailPage from "./pages/LocationDetailPage";
 import SavedPlacesPage from "./pages/SavedPlacesPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import AdminPage from "./pages/AdminPage";
+import CommunityRulesPage from "./pages/CommunityRulesPage";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 import SOSButton from "./components/SOSButton";
@@ -53,6 +55,8 @@ function AppRoutes() {
           <Route path="/saved" element={<SavedPlacesPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/onboarding" element={<OnboardingPage onComplete={() => window.location.href = '/'} />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/rules" element={<CommunityRulesPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

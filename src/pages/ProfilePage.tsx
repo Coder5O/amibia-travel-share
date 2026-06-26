@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Car, Star, LogOut, Image, Info, Save, Settings, X, Plus, ShieldCheck, MapPin, Search, PlusCircle, AlertTriangle, ChevronRight, Phone, Camera, Moon, Sun, Monitor, Users as UsersIcon, Crown } from "lucide-react";
+import { Heart, Car, Star, LogOut, Image, Info, Save, Settings, X, Plus, ShieldCheck, MapPin, Search, PlusCircle, AlertTriangle, ChevronRight, Phone, Camera, Moon, Sun, Monitor, Users as UsersIcon, Crown, Edit2, Bookmark, Map } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { useNavigate } from "react-router-dom";
 import CreatePostDialog from "@/components/CreatePostDialog";
@@ -590,6 +590,18 @@ export default function ProfilePage() {
               <Monitor className="w-4 h-4" /> System
             </button>
           </div>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          <Button variant="outline" onClick={() => navigate("/rules")} className="w-full text-foreground">
+            📜 Community Rules
+          </Button>
+
+          {profile?.role === "admin" && (
+            <Button variant="outline" onClick={() => navigate("/admin")} className="w-full text-primary border-primary/30">
+              <ShieldCheck className="w-4 h-4 mr-2" /> Admin Dashboard
+            </Button>
+          )}
         </div>
 
         <Button variant="ghost" onClick={signOut} className="w-full text-destructive mt-4">Sign Out</Button>

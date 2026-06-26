@@ -12,6 +12,7 @@ import { Heart, Car, Star, LogOut, Image, Info, Save, Settings, X, Plus, ShieldC
 import { useTheme } from "@/components/ThemeProvider";
 import { useNavigate } from "react-router-dom";
 import CreatePostDialog from "@/components/CreatePostDialog";
+import AdminPage from "./AdminPage";
 import { getInitials } from "@/lib/utils";
 
 const categoryBadge: Record<string, { label: string; emoji: string }> = {
@@ -216,6 +217,10 @@ export default function ProfilePage() {
     { key: "saved", label: "Saved", icon: Bookmark },
     { key: "sos", label: "SOS", icon: AlertTriangle },
   ];
+
+  if (profile?.role === "admin") {
+    return <AdminPage />;
+  }
 
   return (
     <div className="max-w-lg mx-auto pb-24">
@@ -596,12 +601,6 @@ export default function ProfilePage() {
           <Button variant="outline" onClick={() => navigate("/rules")} className="w-full text-foreground">
             📜 Community Rules
           </Button>
-
-          {profile?.role === "admin" && (
-            <Button variant="outline" onClick={() => navigate("/admin")} className="w-full text-primary border-primary/30">
-              <ShieldCheck className="w-4 h-4 mr-2" /> Admin Dashboard
-            </Button>
-          )}
         </div>
 
         <Button variant="ghost" onClick={signOut} className="w-full text-destructive mt-4">Sign Out</Button>

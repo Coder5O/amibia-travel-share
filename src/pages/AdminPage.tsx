@@ -219,7 +219,7 @@ export default function AdminPage() {
     <div className="space-y-4 pb-24 max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate("/profile")} className="p-2 rounded-full hover:bg-muted transition-colors">
+        <button onClick={() => navigate("/")} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
         <div>
@@ -228,9 +228,15 @@ export default function AdminPage() {
           </h1>
           <p className="text-xs text-muted-foreground">Manage users, content & community rules</p>
         </div>
-        <button onClick={loadData} className="ml-auto p-2 rounded-full hover:bg-muted transition-colors">
-          <RefreshCw className="w-4 h-4 text-muted-foreground" />
-        </button>
+        
+        <div className="ml-auto flex items-center gap-2">
+          <button onClick={loadData} className="p-2 rounded-full hover:bg-muted transition-colors" title="Refresh Data">
+            <RefreshCw className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()} className="text-destructive">
+            Sign Out
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
